@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+        <robot xmlns:xacro="http://wiki.ros.org/xacro"  name="arm">
+        
+        <!-- the inertial matrix of a solid cylinder-->
+        <xacro:macro name="solid_cylinder_inertia" params="radius length mass *origin">
+        	<inertial>
+		        <mass value="${mass}" />
+       				 <xacro:insert_block name="origin" />
+				         <inertia ixx="${0.0833333 * mass * (3 * radius * radius + length * length)}" ixy="0.0" ixz="0.0"
+        					  iyy="${0.0833333 * mass * (3 * radius * radius + length * length)}" iyz="0.0"
+					          izz="${0.5 * mass * radius * radius}" />
+        	</inertial>
+        </xacro:macro>
+        
+        
+        <xacro:property name="prefix" value="roni_"/>
+        <xacro:property name="base_length" value="3.25"/>
+        <xacro:property name="base_radius" value="0.060" />
+        <xacro:property name="link0_radius" value="0.060" /> 
+          
+            <!-- Inertia parameters -->
+        <xacro:property name="base_mass" value="1.0" />
+        <xacro:property name="link0_mass" value="40.7" />
+	<xacro:property name="link0_length" value="1" />
+      
+        
+        <xacro:property name="link1_mass" value="8.4904" /> 
+        <xacro:property name="link2_mass" value="7.3149" />
+        <xacro:property name="link3_mass" value="7.314899999999998" />
+        <xacro:property name="link4_mass" value="7.3149000000000015" />
+        <xacro:property name="link5_mass" value="7.3149000000000015" />
+        <xacro:property name="link6_mass" value="7.314899999999994" />
+    
+        <!-- Radius for each links- UR5 parameters  -->
+        <xacro:property name="link1_radius" value="0.06" />
+        <xacro:property name="link2_radius" value="0.054" />
+        <xacro:property name="link3_radius" value="0.06" />
+        <xacro:property name="link4_radius" value="0.04" />
+        <xacro:property name="link5_radius" value="0.045" />
+        <xacro:property name="link6_radius" value="0.045" />  <!--  joint 0	-->
+
+	<!-- used for fixinig robot to Gazebo 'base_link -->
+        <link name="world"/>
+
+		<joint name="fixed" type="fixed">
+		   <parent link="world"/>
+		   <child link="${prefix}link0"/>
+		</joint>
+
+         <!-- link 0	-->
+        <link name="${prefix}link0">
+        	<visual>
+		        <origin xyz="0 0 ${link0_length / 2}" rpy="0 0 0" />
+			    <geometry>
+		    		<cylinder radius="${link0_radius}" length="${link0_length}"/>
+			    </geometry>
+		    </visual>
+		
+		    <collision>
+			    <origin xyz="0 0 ${link0_length / 2 }" rpy="0 0 0" />
+			    <geometry>
+				    <cylinder radius="${link0_radius}" length="${link0_length}"/>
+			    </geometry>
+		    </collision>
+
+		    <xacro:solid_cylinder_inertia radius="${link0_radius}" length="${link0_length}" mass="${link0_mass}">
+			    <origin xyz="0.0 0.0 ${link0_length / 2 }" rpy="0 0 0" />
+		    </xacro:solid_cylinder_inertia>
+        </link> 
+
+	    
+       
+        
+     
+    </robot>
