@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+  <world name="default">
+     <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+
+  <model name="vine1">
+      <pose>1.45 0 0 0 0 0</pose>
+      <static>true</static>
+      <link name="vine1">
+        <visual name="vine1v">
+          <geometry>
+      	      <mesh>
+      		      <uri>/home/student/catkin_ws/src/sock-puppet/man_code/models/vineyard/vineyard.dae</uri>
+                <scale>5.5 5.5 5.5</scale>
+      	      </mesh>
+      	  </geometry>
+	       </visual>
+       </link>
+    </model>
+
+
+  <model name="vine2">
+      <pose>-1.45 0 0 0 0 0</pose>
+      <static>true</static>
+      <link name="vine2">
+        <visual name="vine2v">
+          <geometry>
+              <mesh>
+                <uri>/home/student/catkin_ws/src/sock-puppet/man_code/models/vineyard/vineyard.dae</uri>
+                <scale>5.5 5.5 5.5</scale>
+              </mesh>
+          </geometry>
+         </visual>
+       </link>
+    </model>
+
+      <model name="vine3">
+      <pose>1.45 -5.5 0 0 0 0</pose>
+      <static>true</static>
+      <link name="vine3">
+        <visual name="vine3v">
+          <geometry>
+              <mesh>
+                <uri>/home/student/catkin_ws/src/sock-puppet/man_code/models/vineyard/vineyard.dae</uri>
+                <scale>5.5 5.5 5.5</scale>
+              </mesh>
+          </geometry>
+         </visual>
+       </link>
+    </model>
+
+      <model name="vine4">
+      <pose>-1.45 -5.5 0 0 0 0</pose>
+      <static>true</static>
+      <link name="vine4">
+        <visual name="vine4v">
+          <geometry>
+              <mesh>
+                <uri>/home/student/catkin_ws/src/sock-puppet/man_code/models/vineyard/vineyard.dae</uri>
+                <scale>5.5 5.5 5.5</scale>
+              </mesh>
+          </geometry>
+         </visual>
+       </link>
+    </model>
+<!--
+  <model name="box">
+      <pose>1 0 0.8 0 0 0</pose>
+      <static>true</static>
+      <link name="body2">
+        <visual name="visual2">
+        <geometry>
+      <cylinder radius="1" length="2.9"/> 
+        </geometry>
+         </visual>
+       </link>
+    </model>
+-->
+ 
+
+
+  </world>
+</sdf>

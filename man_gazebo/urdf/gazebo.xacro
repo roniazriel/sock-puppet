@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  
+<material name="Orange">
+    <color rgba="${255/255} ${108/255} ${10/255} 1.0"/>
+  </material>
+<material name="Green">
+    <color rgba="${0/255} ${255/255} ${0/255} 0.7"/>
+</material>
+<material name="LightGrey">
+     <color rgba="0.7 0.7 0.7 1.0"/>
+</material>
+<material name="Blue">
+     <color rgba="${0/255} ${0/255} ${255/255} 1.0"/>
+</material>
+<material name="Red">
+     <color rgba="${255/255} ${0/255} ${0/255} 1.0"/>
+</material>
+<material name="Purple">
+     <color rgba="0.5 0 0.5 1.0"/>
+</material>   
+
+  <xacro:macro name="arm_gazebo" params="prefix">
+    <gazebo reference="${prefix}link0">
+      <selfCollide>true</selfCollide>
+	  <material>Gazebo/Red</material>
+    </gazebo>
+    <gazebo reference="${prefix}link1">
+      <selfCollide>true</selfCollide>
+	  <material>Gazebo/Orange</material>
+    </gazebo>
+    <gazebo reference="${prefix}link2">
+      <selfCollide>true</selfCollide>
+	  <material>Gazebo/Green</material>
+    </gazebo>
+    <gazebo reference="${prefix}link3">
+      <selfCollide>true</selfCollide>
+	  <material>Gazebo/Purple</material>
+    </gazebo>
+    <gazebo reference="${prefix}link4">
+      <selfCollide>true</selfCollide>
+	  <material>Gazebo/Red</material>
+    </gazebo> 
+    <gazebo reference="${prefix}link5">
+      <selfCollide>true</selfCollide>
+	  <material>Gazebo/Green</material>
+    </gazebo>
+    <gazebo reference="${prefix}link6">
+      <selfCollide>true</selfCollide>
+	  <material>Gazebo/Blue</material>
+    </gazebo>
+    <gazebo reference="${prefix}ee_link">
+      <selfCollide>true</selfCollide>
+    </gazebo>
+    <gazebo reference="camera_link">
+      <selfCollide>true</selfCollide>
+    </gazebo>
+  
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,9 @@
+<launch>
+	<node pkg="tf" type="static_transform_publisher" name="point1_broadcaster" args="0.5 0.15 3.86 1.98 -0.83 0 world point1 100" />
+	<node pkg="tf" type="static_transform_publisher" name="point2_broadcaster" args="0.5 0 3.89 -3.14 0 0 world point2 100" />
+	<node pkg="tf" type="static_transform_publisher" name="point3_broadcaster" args="0.5 -0.15 3.86 -1.98 -0.83 0 world point3 100" />
+	<node pkg="tf" type="static_transform_publisher" name="point4_broadcaster" args="0.5 -0.15 3.45 -0.81 0.52 0 world point4 100" />
+	<node pkg="tf" type="static_transform_publisher" name="point5_broadcaster" args="0.5 0.15 3.45 0.9 0.52 0 world point5 100" />
+</launch>
+
+   

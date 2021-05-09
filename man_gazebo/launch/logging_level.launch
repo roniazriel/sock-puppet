@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+
+	<arg name="moveit_log" default="" />
+	<node pkg="rosservice" type="rosservice" name="set_logger_level_moveit_wrapper" args="call --wait $(arg moveit_log)/set_logger_level &quot; {logger: 'ros', level: 'Error'} &quot;" respawn="false" />
+
+</launch>
+

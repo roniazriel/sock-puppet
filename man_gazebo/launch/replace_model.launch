@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="man" default="manipulator" />
+ 	<arg name="dof" default="6dof" />
+
+	<!--
+<node name="reset_gazebo_simulation" pkg="rosservice" type="rosservice" args="call /gazebo/reset_world" />	-->
+    <node name="delete_gazebo_model" pkg="rosservice" type="rosservice" args="call /gazebo/delete_model &quot; model_name: 'robot' &quot; "  respawn="false" />
+	
+	<param name="robot_description" command="$(find xacro)/xacro  '$(find man_gazebo)/urdf/$(arg dof)/$(arg man).urdf.xacro'" />
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot " respawn="false"  />
+
+</launch>
+
+
+
+
