@@ -11,7 +11,7 @@
   <joint name="world_joint" type="fixed">
     <parent link="world" />
     <child link = "base_link" />
-    <origin xyz="0 -1 0" rpy="0.0 0.0 0.0" />
+    <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
   </joint>
 
 
@@ -31,8 +31,8 @@
 		<xacro:property name="joint_lower_limit" value="${-pi}" /> 
 	</xacro:if>
 	<xacro:unless value="${joint_type == 'revolute'}"  >
-		<xacro:property name="joint_upper_limit" value="${2*link_length}" /> 
-		<xacro:property name="joint_lower_limit" value="${0}" />  
+		<xacro:property name="joint_upper_limit" value="${link_length}" /> 
+		<xacro:property name="joint_lower_limit" value="${-link_length}" />  
 	</xacro:unless>
 	<limit lower="${joint_lower_limit}" upper="${joint_upper_limit}" effort="150.0" velocity="3.15"/>
 </xacro:macro>
@@ -47,7 +47,7 @@
 	<xacro:property name="joint5_type" value="revolute" /> 
 	<xacro:property name="joint6_type" value="revolute" /> 
 
-	<xacro:property name="joint0_axe" value="0 0 1" /> 
+	<xacro:property name="joint0_axe" value="0 1 0" /> 
 	<xacro:property name="joint1_axe" value="0 0 1" /> 
 	<xacro:property name="joint2_axe" value="0 1 0" /> 
 	<xacro:property name="joint3_axe" value="0 1 0" /> 
@@ -67,8 +67,9 @@
 	<xacro:property name="link6_length" value="0.02" /> 
 
     <!-- Inertia parameters -->
-	<xacro:property name="link0_mass" value="40.7" />
-    <xacro:property name="base_mass" value="1.0" /> 
+    <xacro:property name="base_mass" value="44" /> 
+    <xacro:property name="ee_mass" value="2.5" /> 
+    <xacro:property name="link0_mass" value="7" />
     <xacro:property name="link1_mass" value="3.7" />
     <xacro:property name="link2_mass" value="8.393" />
     <xacro:property name="link3_mass" value="2.275" />
@@ -100,9 +101,14 @@
 			    <box size="${base_length} ${base_length} ${base_height}"/> 	
         </geometry>
       </collision>
-      <xacro:cylinder_inertial radius="${base_radius}" length="${base_length}" mass="${base_mass}">
-        <origin xyz="0.0 0.0 ${base_length/2}" rpy="0 0 0" />
-      </xacro:cylinder_inertial>
+      <inertial>
+        <mass value="${base_mass}" />
+        <origin xyz="0.0 0.0 ${base_height/2}" />
+        <inertia ixx="436.5" ixy="0"  ixz="0"
+                          iyy="1.8" iyz="0"
+                                  izz="436.5"/>
+      </inertial>
+     
     </link>
 
 <!--  joint 0	-->
@@ -111,7 +117,7 @@
       <child link = "${prefix}link0" />
       <origin xyz="0.0 0 ${base_height + link0_radius+0.01}" rpy="0 0.0 0" />
       <axis xyz="${joint0_axe}" />
-	  <xacro:joint_limit joint_type="${joint0_type}" link_length="${link0_length*6}"/>
+	  <xacro:joint_limit joint_type="${joint0_type}" link_length="${base_length/2}"/>
       <dynamics damping="0.0" friction="0.0"/>
     </joint>
 
@@ -302,17 +308,17 @@
     </link>
 
          <!-- fake joint - the rotation about z axe of the camera is not important -->
-        <joint name="fake_joint" type="revolute">
+   <!--  <joint name="fake_joint" type="revolute">
       <parent link="${prefix}link6" />
       <child link = "camera_link" />
       <origin xyz="0.0  0.0 ${link6_length}" rpy="0.0 0.0 0" />
       <axis xyz="0 0 1"/>
       <xacro:joint_limit joint_type="revolute" link_length="0.1"/>
       <dynamics damping="0.0" friction="0.0"/>
-        </joint>
+    </joint> -->
 
     <!-- camera link -->
-        <link name="camera_link">
+    <!--     <link name="camera_link">
           <collision>
             <geometry>
               <box size="0.01 0.01 0.01"/>
@@ -323,10 +329,10 @@
             <origin xyz="0.0 0.0 0.005" rpy="0 0 0" />
           </xacro:cylinder_inertial>
         </link>
-
+ -->
 
     <joint name="${prefix}ee_fixed_joint" type="fixed">
-      <parent link="${prefix}camera_link" />
+      <parent link="${prefix}link6" />
       <child link = "${prefix}ee_link" />
       <origin xyz="0.0  0.0 0.01" rpy="0.0 0.0 0" />
    
@@ -334,12 +340,31 @@
 
 <!-- ee link -->
     <link name="${prefix}ee_link">
+      <visual>
+        <geometry>
+          <mesh filename="/home/student/catkin_ws/src/sock-puppet/man_gazebo/urdf/meshes/ee.dae" scale="0.0005 0.0005 0.0005" />
+        </geometry>
+      
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="/home/student/catkin_ws/src/sock-puppet/man_gazebo/urdf/meshes/ee.dae" scale="0.0005 0.0005 0.0005"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="${ee_mass}" />
+        <origin xyz="0.0 0.0 ${base_height/2}" />
+        <inertia ixx="24.5" ixy="0"  ixz="0"
+                          iyy="0.1" iyz="0"
+                                  izz="24.5"/>
+      </inertial>
+<!--
       <collision>
         <geometry>
           <box size="0.01 0.01 0.01"/>
         </geometry>
         <origin rpy="0 0 0" xyz="0 0 0.005"/>
-      </collision>
+      </collision> -->
 	</link>
 
     <xacro:arm_transmission prefix="${prefix}" />
