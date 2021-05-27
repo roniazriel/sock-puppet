@@ -68,6 +68,7 @@
 
     <!-- Inertia parameters -->
     <xacro:property name="base_mass" value="44" /> 
+    <xacro:property name="ee_mass" value="1.5" /> 
     <xacro:property name="link0_mass" value="7" />
     <xacro:property name="link1_mass" value="3.7" />
     <xacro:property name="link2_mass" value="8.393" />
@@ -282,11 +283,12 @@
     <joint name="${prefix}joint6" type="${joint6_type}">
       <parent link="${prefix}link5" />
       <child link = "${prefix}link6" />
-      <origin xyz="0 0 ${link5_length } " rpy="0 0 0" />
+      <origin xyz="0 0 ${link5_length} " rpy="0 0 0" />
       <axis xyz="${joint6_axe}" />
 	  <xacro:joint_limit joint_type="${joint6_type}" link_length="${link6_length}"/>
       <dynamics damping="0.0" friction="0.0"/>
     </joint>
+
 <!-- link 6 -->
     <link name="${prefix}link6">
       <visual>
@@ -307,17 +309,17 @@
     </link>
 
          <!-- fake joint - the rotation about z axe of the camera is not important -->
-        <joint name="fake_joint" type="revolute">
+   <!--  <joint name="fake_joint" type="revolute">
       <parent link="${prefix}link6" />
       <child link = "camera_link" />
       <origin xyz="0.0  0.0 ${link6_length}" rpy="0.0 0.0 0" />
       <axis xyz="0 0 1"/>
       <xacro:joint_limit joint_type="revolute" link_length="0.1"/>
       <dynamics damping="0.0" friction="0.0"/>
-        </joint>
+    </joint> -->
 
     <!-- camera link -->
-        <link name="camera_link">
+    <!--     <link name="camera_link">
           <collision>
             <geometry>
               <box size="0.01 0.01 0.01"/>
@@ -328,23 +330,41 @@
             <origin xyz="0.0 0.0 0.005" rpy="0 0 0" />
           </xacro:cylinder_inertial>
         </link>
-
+ -->
 
     <joint name="${prefix}ee_fixed_joint" type="fixed">
-      <parent link="${prefix}camera_link" />
+      <parent link="${prefix}link6" />
       <child link = "${prefix}ee_link" />
-      <origin xyz="0.0  0.0 0.01" rpy="0.0 0.0 0" />
+      <origin xyz="0 ${link6_radius} ${link6_length} " rpy="0 0 0" />
    
     </joint>
 
 <!-- ee link -->
     <link name="${prefix}ee_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://man_gazebo/urdf/meshes/ee.dae" scale="0.0005 0.0005 0.0005" />
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://man_gazebo/urdf/meshes/ee.dae" scale="0.0005 0.0005 0.0005"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="${ee_mass}" />
+        <origin xyz="0.0 0.0 0.0" />
+        <inertia ixx="5" ixy="0"  ixz="0"
+                          iyy="0.1" iyz="0"
+                                  izz="5"/>
+      </inertial>
+<!--
       <collision>
         <geometry>
           <box size="0.01 0.01 0.01"/>
         </geometry>
         <origin rpy="0 0 0" xyz="0 0 0.005"/>
-      </collision>
+      </collision> -->
 	</link>
 
     <xacro:arm_transmission prefix="${prefix}" />

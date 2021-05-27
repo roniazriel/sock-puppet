@@ -5,10 +5,14 @@ from six.moves import input
 import sys
 import copy
 import rospy
-import time
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
+
+import time
+import csv
+import pandas as pd
+
 
 try:
   from math import pi, tau, dist, fabs, cos
@@ -30,8 +34,35 @@ scene = moveit_commander.PlanningSceneInterface()
 group_name = "manipulator"
 move_group = moveit_commander.MoveGroupCommander(group_name)
 
+''' code start'''
 
-coords= [[0.4,2,1.53],[0.4,4,1.53]]
+# def moveResult(data):
+# 	print(data)
+# 	if(data.result.error_code):
+# 		print('goal success')
+# 	else:
+# 		print('goal failed')
+# 	execution_results.append(data.result.error_code)
+
+# rospy.Subscriber("/move_group/result", moveit_msgs.msg.MoveGroupActionResult, moveResult)
+
+
+
+plan_results=[]
+move_duration=[]
+grapes_coords=  [[1.2,2.9,1.5],
+				 [1.14,2.08,1.57],
+				 [1.51,1.42,1.85],
+				 [1.26,0.08,2.06],
+
+				 [1.05,-0.15,1.3],
+				 [1.43,-1.53,1.47],
+				 [1.18,-1.42,1.6],
+				 [1.1,-3.15,1.5],
+				 [1.16,-4.2,1.7],
+				 [1.4,-4.5,1.8]]
+
+
 
 def go_home():
 	home = move_group.get_current_joint_values()
@@ -43,32 +74,53 @@ def go_home():
 	home[6] = 0
 	move_group.go(home, wait=True)
 	move_group.stop()
-	print('at home')
+	print('Home position reached')
 
 # new_pos = move_group.get_current_joint_values()
 # new_pos[0] = 1
 
 def go_pose(goal):
+	spray_offset_x = 0.35
+	vine_offset_x = 0.25
+	start = time.time()
 	pose_goal = geometry_msgs.msg.Pose()
 	pose_goal.orientation.w = 1
-	pose_goal.position.x = goal[0]
+	pose_goal.position.x = goal[0] - spray_offset_x- vine_offset_x
 	pose_goal.position.y = goal[1]
 	pose_goal.position.z = goal[2]
 
 	move_group.set_pose_target(pose_goal)
 
-	move_group.go(wait=True)
+	plan_result=move_group.go(wait=True)
+	plan_results.append(plan_result)
 	move_group.stop()
+	end = time.time()
+	print('Time:',end - start)
+	move_duration.append(end - start)
 	move_group.clear_pose_targets()
-	print('at pos')
+
+	if(plan_result):
+		print("Success - A plan was created")		
+		time.sleep(5)
+		print('Goal position reached')
+	else:
+		print("Failed - The goal is out of reach")
+		time.sleep(3)
+
+	
 
 go_home()
 
-for goal in coords:
+for goal in grapes_coords:
 	go_pose(goal)
-	time.sleep(5)
 	go_home()
 
+
+print(move_duration)
+print(plan_results)
+
+pd.DataFrame(move_duration).to_csv("/home/student/Downloads/move_duration.csv", header=None, index=None)
+pd.DataFrame(plan_results).to_csv("/home/student/Downloads/plan_results.csv", header=None, index=None)
 
 
 
