@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="vineyard">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>/home/student/catkin_ws/src/sock-puppet/man_code/models/vineyard/vineyard.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="leaf">
+        <geometry>
+          <mesh>
+            <uri>/home/student/catkin_ws/src/sock-puppet/man_code/models/vineyard/vineyard.dae</uri>
+            <submesh>
+              <name>Leaf</name>
+            </submesh>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>/home/student/catkin_ws/src/sock-puppet/man_code/models/vineyard/materials/scripts/</uri>
+            <uri>/home/student/catkin_ws/src/sock-puppet/man_code/models/vineyard/materials/textures/</uri>
+            <name>Vineyard/Leaf</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -121,6 +121,7 @@ print(plan_results)
 
 pd.DataFrame(move_duration).to_csv("/home/student/Downloads/move_duration.csv", header=None, index=None)
 pd.DataFrame(plan_results).to_csv("/home/student/Downloads/plan_results.csv", header=None, index=None)
+pd.DataFrame(grapes_coords).to_csv("/home/student/Downloads/grapes_coords.csv", header=None, index=None)
 
 
 
