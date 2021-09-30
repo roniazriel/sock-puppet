@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="man" default="manipulator" />
+	<arg name="man" default="arm" />
 	<arg name="dof" default="6dof" />
 	<arg name="gazebo" default="true" doc="Starts gazebo" />
 	<arg name="gazebo_pause" default="false" doc="Starts gazebo in paused mode" />
@@ -21,8 +21,8 @@
 	<include file="$(find man_moveit)/launch/man_moveit_planning_execution.launch">
 		<arg name="dof" value="$(arg dof)" />
 	</include>
-	<!-- show in rviz- just for visulize or to move the manipulator manually
-	<include if="$(arg rviz)" file="$(find man_moveit)/launch/moveit_rviz.launch"/> -->
+	<!-- show in rviz- just for visulize or to move the manipulator manually -->
+	<include if="$(arg rviz)" file="$(find man_moveit)/launch/moveit_rviz.launch"/> 
 
 
 </launch>
