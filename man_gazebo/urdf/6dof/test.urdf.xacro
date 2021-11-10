@@ -200,145 +200,14 @@
 <!--  joint 3	-->
     <joint name="${prefix}joint3" type="${joint3_type}">
       <parent link="${prefix}link2" />
-      <child link = "${prefix}link3" />
+      <child link = "${prefix}ee_link" />
       <origin xyz="0.0 ${link2_radius*2.0} ${link2_length}" rpy="0.0 0.0 0.0" />
       <axis xyz="${joint3_axe}" />
 	  <xacro:joint_limit joint_type="${joint3_type}" link_length="${link3_length}"/>
       <dynamics damping="0.0" friction="0.0"/>
     </joint>
 
-<!--  link 3 -->  
-    <link name="${prefix}link3">
-      <visual>
-		<origin xyz="0 0 ${link3_length / 2 }" rpy="0 0 0" />
-        <geometry>
-		<cylinder radius="${link3_radius}" length="${link3_length}"/>
-        </geometry>
-      </visual>
-      <collision>
-		<origin xyz="0 0 ${link3_length / 2 }" rpy="0 0 0" />
-        <geometry>
-			<cylinder radius="${link3_radius}" length="${link3_length}"/>
-        </geometry>
-      </collision>
-      <xacro:cylinder_inertial radius="${link3_radius}" length="${link3_length}" mass="${link3_mass}">
-        <origin xyz="0 0 ${link3_length / 2 }" rpy="0 0 0" />
-      </xacro:cylinder_inertial>
-    </link>
-<!--  joint 4	-->
-    <joint name="${prefix}joint4" type="${joint4_type}">
-      <parent link="${prefix}link3" />
-      <child link = "${prefix}link4" />
-      <origin xyz="0 -${link4_radius + link3_radius } ${link3_length}" rpy="0.0 0 0.0" />
-      <axis xyz="${joint4_axe} " />
-	  <xacro:joint_limit joint_type="${joint4_type}" link_length="${link4_length}"/>
-      <dynamics damping="0.0" friction="0.0"/>
-    </joint>
 
-<!-- link 4 -->
-    <link name="${prefix}link4">
-      <visual>
-		<origin xyz="0 0 ${link4_length/2}" rpy="0 0 0" />
-        <geometry>
-			   <cylinder radius="${link4_radius}" length="${link4_length}"/>
-        </geometry>
-      </visual>
-      <collision>
-		<origin xyz="0 0 ${link4_length/2}" rpy="0 0 0" />
-        <geometry>
-			   <cylinder radius="${link4_radius}" length="${link4_length}"/>	
-        </geometry>
-      </collision>
-      <xacro:cylinder_inertial radius="${link4_radius}" length="${link4_length}" mass="${link4_mass}">
-        <origin xyz="0 0 ${link4_length/2}" rpy="0 0 0" />
-      </xacro:cylinder_inertial>
-    </link>
-<!--  joint 5	-->
-    <joint name="${prefix}joint5" type="${joint5_type}">
-      <parent link="${prefix}link4" />
-      <child link = "${prefix}link5" />
-      <origin xyz="0 0 ${link4_length+link5_radius}" rpy=" ${-pi/2} 0 0" />
-      <axis xyz="${joint5_axe}" />
-	  <xacro:joint_limit joint_type="${joint5_type}" link_length="${link5_length}"/>
-      <dynamics damping="0.0" friction="0.0"/>
-    </joint>
-
-<!-- link 5 -->
-    <link name="${prefix}link5">
-      <visual>
-        <origin xyz=" 0 0 ${link5_length/2} " rpy="0 0 0" />
-        <geometry>
-		<cylinder radius="${link5_radius}" length="${link5_length}"/>
-        </geometry>
-      </visual>
-      <collision>
-        <origin xyz="0 0 ${link5_length/2} " rpy="0 0 0" />
-        <geometry>
-		<cylinder radius="${link5_radius}" length="${link5_length}"/>
-        </geometry>
-      </collision>
-      <xacro:cylinder_inertial radius="${link5_radius}" length="${link5_length}" mass="${link5_mass}">
-        <origin xyz="0 0 ${link5_length/2}" rpy="0 0 0" />
-      </xacro:cylinder_inertial>
-    </link>
-<!--  joint 6	-->
-    <joint name="${prefix}joint6" type="${joint6_type}">
-      <parent link="${prefix}link5" />
-      <child link = "${prefix}link6" />
-      <origin xyz="0 0 ${link5_length } " rpy="0 0 0" />
-      <axis xyz="${joint6_axe}" />
-	  <xacro:joint_limit joint_type="${joint6_type}" link_length="${link6_length}"/>
-      <dynamics damping="0.0" friction="0.0"/>
-    </joint>
-<!-- link 6 -->
-    <link name="${prefix}link6">
-      <visual>
-        <origin xyz="0 0 ${link6_length/2}" rpy="0 0 0" />
-        <geometry>
-		<cylinder radius="${link6_radius}" length="${link6_length}"/>
-        </geometry>
-      </visual>
-      <collision>
-        <origin xyz="0 0 ${link6_length/2}" rpy="0 0 0" />
-        <geometry>
-		<cylinder radius="${link6_radius}" length="${link6_length}"/>
-        </geometry>
-      </collision>
-      <xacro:cylinder_inertial radius="${link6_radius}" length="${link6_length}" mass="${link6_mass}">
-        <origin xyz="0 0 ${link6_length/2}" rpy="0 0 0" />
-      </xacro:cylinder_inertial>
-    </link>
-
-         <!-- fake joint - the rotation about z axe of the camera is not important -->
-        <joint name="fake_joint" type="revolute">
-      <parent link="${prefix}link6" />
-      <child link = "camera_link" />
-      <origin xyz="0.0  0.0 ${link6_length}" rpy="0.0 0.0 0" />
-      <axis xyz="0 0 1"/>
-      <xacro:joint_limit joint_type="revolute" link_length="0.1"/>
-      <dynamics damping="0.0" friction="0.0"/>
-        </joint>
-
-    <!-- camera link -->
-        <link name="camera_link">
-          <collision>
-            <geometry>
-              <box size="0.01 0.01 0.01"/>
-            </geometry>
-            <origin rpy="0 0 0" xyz="0 0 0.005"/>
-          </collision>
-          <xacro:cylinder_inertial radius="0.01" length="0.01" mass="0.01">
-            <origin xyz="0.0 0.0 0.005" rpy="0 0 0" />
-          </xacro:cylinder_inertial>
-        </link>
-
-
-    <joint name="${prefix}ee_fixed_joint" type="fixed">
-      <parent link="${prefix}camera_link" />
-      <child link = "${prefix}ee_link" />
-      <origin xyz="0.0  0.0 0.01" rpy="0.0 0.0 0" />
-   
-    </joint>
 
 <!-- ee link -->
     <link name="${prefix}ee_link">
