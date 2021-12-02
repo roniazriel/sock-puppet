@@ -27,7 +27,7 @@
     <camera name="user_camera">
       <pose>-1.7 5 1.15 0 0.03 0.55</pose> 
     </camera>
-  </gui> -->
+  </gui> 
 
   <model name="vine1">
       <pose>1.2 0 0 0 0 0</pose>
@@ -42,7 +42,7 @@
       	  </geometry>
 	       </visual>
        </link>
-    </model>
+    </model>-->
 
 
 <!-- 

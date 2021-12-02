@@ -3,8 +3,10 @@
     1) first create (if create_urdf == True) the dsired urdf files
     2) run over all the urdf files and enter them to the simulator
     3) create csv file (the name of the file is the current date and time) with the results of simulation
+    , UrdfClass
  """
-from ros import Ros, MoveGroupPythonInterface, UrdfClass, HandleCSV
+from ros import Ros, MoveGroupPythonInterface, HandleCSV
+from UrdfClass import UrdfClass
 from datetime import datetime
 from os import environ, listdir, path, mkdir  # , rename
 import numpy as np
@@ -31,13 +33,7 @@ class Simulator(object):
         self.wait1 = wait1
         self.wait2 = wait2
         self.json_data = []
-        if create:  # all the configuration of the arms
-            self.create_urdf_from_csv(str(self.dof) + "dof_configs",  link_max)
-        else:
-            if not arms:
-                self.arms_exist()
-            else:
-                self.arms = arms
+        self.arms = arms
         # desired positions and orientaions of the EE in world frame
         z = 3  # height from ground
         # self.poses = [[0.5, 0, z + 0.9], [0.2, 0, z + 0.9], [0.2, 0.0, z + 0.65], [0.2, 0, z + 0.4]]
@@ -53,37 +49,39 @@ class Simulator(object):
              [1.1,-3.15,1.5],
              [1.16,-4.2,1.7],
              [1.4,-4.5,1.8]]
-        self.poses = [[0.5, 0, z + 0.9], [0.55, 0, z + 0.9], [0.55, 0, z + 0.95], [0.5, 0, z + 0.95], [0.45, 0, z + 0.95],
-                      [0.45, 0, z + 0.9], [0.45, 0, z + 0.85], [0.5, 0, z + 0.85], [0.55, 0, z + 0.85],
-                      [0.2, 0, z + 0.9], [0.25, 0, z + 0.9], [0.25, 0, z + 0.95], [0.2, 0, z + 0.95], [0.15, 0, z + 0.95],
-                      [0.15, 0, z + 0.9], [0.15, 0, z + 0.85], [0.2, 0, z + 0.85], [0.25, 0, z + 0.85],
-                      [0.2, 0.0, z + 0.65], [0.25, 0.0, z + 0.65], [0.25, 0.0, z + 0.7], [0.2, 0.0, z + 0.7], [0.15, 0.0, z + 0.7],
-                      [0.15, 0.0, z + 0.65], [0.15, 0.0, z + 0.6], [0.2, 0.0, z + 0.6], [0.25, 0.0, z + 0.6],
-                      [0.2, 0, z + 0.4],  [0.25, 0, z + 0.4],  [0.25, 0, z + 0.45],  [0.2, 0, z + 0.45], [0.15, 0, z + 0.45],
-                      [0.15, 0, z + 0.4],  [0.15, 0, z + 0.35],  [0.2, 0, z + 0.35],  [0.25, 0, z + 0.35]]
+        self.poses = grapes_coords
+        #[[0.5, 0, z + 0.9], [0.55, 0, z + 0.9], [0.55, 0, z + 0.95], [0.5, 0, z + 0.95], [0.45, 0, z + 0.95],
+         #             [0.45, 0, z + 0.9], [0.45, 0, z + 0.85], [0.5, 0, z + 0.85], [0.55, 0, z + 0.85],
+          #            [0.2, 0, z + 0.9], [0.25, 0, z + 0.9], [0.25, 0, z + 0.95], [0.2, 0, z + 0.95], [0.15, 0, z + 0.95],
+           #           [0.15, 0, z + 0.9], [0.15, 0, z + 0.85], [0.2, 0, z + 0.85], [0.25, 0, z + 0.85],
+            #          [0.2, 0.0, z + 0.65], [0.25, 0.0, z + 0.65], [0.25, 0.0, z + 0.7], [0.2, 0.0, z + 0.7], [0.15, 0.0, z + 0.7],
+             #         [0.15, 0.0, z + 0.65], [0.15, 0.0, z + 0.6], [0.2, 0.0, z + 0.6], [0.25, 0.0, z + 0.6],
+              #        [0.2, 0, z + 0.4],  [0.25, 0, z + 0.4],  [0.25, 0, z + 0.45],  [0.2, 0, z + 0.45], [0.15, 0, z + 0.45],
+               #       [0.15, 0, z + 0.4],  [0.15, 0, z + 0.35],  [0.2, 0, z + 0.35],  [0.25, 0, z + 0.35]]
         self.oriens = [[0, -3.14, 0], [0, -3.14, 0], [0, -3.14, 0], [0, -3.14, 0], [0, -3.14, 0], [0, -3.14, 0],
-                       [0, -3.14, 0], [0, -3.14, 0], [0, -3.14, 0], [0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0],
-                       [0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0],
-                       [0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0], [0, 3.1459*0.5, 0],
-                       [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0],
-                       [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0],
-                       [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0],
-                       [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0]]
+                       [0, -3.14, 0], [0, -3.14, 0], [0, -3.14, 0], [0, 3.1459*0.75, 0] ]
+                       #, [0, 3.1459*0.75, 0],
+                       #[0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0],
+                       #[0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0], [0, 3.1459*0.75, 0], [0, 3.1459*0.5, 0],
+                       #[0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0],
+                       #[0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.5, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0],
+                       #[0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0],
+                       #[0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0]]
         self.save_name = 'results_file' + datetime.now().strftime("%d_%m_") + str(dof) + "dof_" \
                         + str(len(self.poses)) + "d_"
         # for some reason the 1st manipulator must succeed reach to point otherwise the other manipulators will failed
-        main_launch_arg = ["gazebo_gui:=false", "rviz:=false", "dof:=" + str(self.dof) + "dof"]
+        '''main_launch_arg = ["gazebo_gui:=true", "rviz:=true", "dof:=" + str(self.dof) + "dof"]
         sleep(0.1)
         self.main = self.ros.start_launch("main", "man_gazebo", main_launch_arg)  # main launch file
         # set the obstacles and initiliaze the manipulator
         self.manipulator_move = MoveGroupPythonInterface()  # for path planning and set points
         # add floor and plant to the planning model
         sleep(0.12)
-        self.manipulator_move.add_obstacles(height=z + 0.75, radius=0.1, pose=[0.5, 0])
+        #self.manipulator_move.add_obstacles(height=z + 0.75, radius=0.1, pose=[0.5, 0])
         pos = self.manipulator_move.get_current_position()
         orien = self.manipulator_move.get_current_orientain()
         self.manipulator_move.go_to_pose_goal([pos.x, pos.y, pos.z], [orien[0], orien[1], orien[2]])
-        self.replace_model(-1)  # set the first arm
+        self.replace_model(-1)  # set the first arm'''
 
     @staticmethod
     def save_json(name="data_file", data=None):
@@ -151,6 +149,7 @@ class Simulator(object):
                 elif joint_parent_axis[i].strip() == "z":
                     rpy.append(['0 ', '0 ', '0 '])
         arm = UrdfClass(links, joints, joint_axis, rpy)
+        arm.urdf_write(arm.urdf_data(), file_name)
         return {"arm": arm, "name": file_name, "folder": folder}
 
     def set_links_length(self, min_length=1, link_min=0.1, link_interval=0.3, link_max=0.71):

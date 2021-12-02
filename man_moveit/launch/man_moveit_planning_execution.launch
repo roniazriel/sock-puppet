@@ -1,4 +1,7 @@
 <launch>
+ <!-- the "sim" argument controls whether we connect to a Simulated or Real robot -->
+ <!-- if sim=false, a robot_ip argument is required -->
+
 	<arg name="dof" default="6dof" />
 	<arg name="sim" default="true" />
 	<arg name="debug" default="false" />

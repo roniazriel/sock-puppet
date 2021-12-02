@@ -10,6 +10,7 @@ class UrdfClass(object):
         :param links: array of the links lengths in meters [must be positive float]
         the first link will be the base link, who is always the same(connected to the world and link1  - his joint is limited to 0)
         """
+
         if rpy is None:
             rpy = []
         if joints_axis is None:
@@ -338,8 +339,9 @@ class UrdfClass(object):
         return joint
 
     @staticmethod
-    def urdf_write(data, filename=str(datetime.now().minute)):
-        fil = open(filename + '.urdf.xacro', 'w')
+    def urdf_write(data, filename = str(datetime.now())):
+        path='/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/'
+        fil = open(path+filename + '.urdf.xacro', 'w')
         fil.write(data)
         fil.close()
 

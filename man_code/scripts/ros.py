@@ -23,7 +23,7 @@ from six.moves import input
 import sys
 import copy
 import pandas as pd
-
+from time import sleep
 
 """ This class is for using easly ros commands"""
 class Ros(object):   
@@ -43,9 +43,11 @@ class Ros(object):
             uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
             path = self.pathname+launch_path+"/launch/"+launch_name+".launch"
             cli_args = [path, args]
+
             roslaunch_file = [(roslaunch.rlutil.resolve_launch_arguments(cli_args)[0], args)]
             launch = roslaunch.parent.ROSLaunchParent(uuid, roslaunch_file)
             launch.start()
+            # sleep(50)
             return launch
         except ValueError:
             rospy.loginfo('Error occurred at start launch function')
@@ -156,17 +158,23 @@ class MoveGroupPythonInterface(Ros):
         z = np.around(0.5*np.transpose(nor_dis)*w, 3)
         return z
 
-    def go_to_pose_goal(self, pose, orientaion, joints=None, links=None):
+    def go_to_pose_goal(self, pose, orientaion=None, joints=None, links=None):
         """send position and orientaion of the desired point
         pose - x,y,z poistion - in world frame
         orientaion - roll, pitch, yaw position - in world frame
         return true if the movement succeeded and reach at the desired accuracy
         """
-        # orientaion = self.get_current_orientain()
-        # orientaion = [orientaion[0], orientaion[1], orientaion[2]]
-        pose_goal = pose + orientaion
+        #orientaion = self.get_current_orientain()
+        #orientaion = [orientaion[0], orientaion[1], orientaion[2], orientaion[3]]
+        pose_goal = geometry_msgs.msg.Pose()
+        pose_goal.orientation.w = 1
+        pose_goal.position.x = pose[0]
+        pose_goal.position.y = pose[1]
+        pose_goal.position.z = pose[2]
+
+        #pose_goal = pose + orientaion
         self.move_group.set_pose_target(pose_goal)
-        # self.move_group.set_position_target(pose)
+        #self.move_group.set_position_target(pose_goal)
         ind = 1
         if joints is None:
             joints = ["revolute"] * (len(self.move_group.get_active_joints())-2)
@@ -185,12 +193,12 @@ class MoveGroupPythonInterface(Ros):
         self.move_group.clear_pose_targets()
         if plan:
             ind = self.indices_calc(joints, links)
-        orientaion = (np.asarray(orientaion)-2 * np.pi) % (2 * np.pi)
+        '''orientaion = (np.asarray(orientaion)-2 * np.pi) % (2 * np.pi)
         goal = [pose[0], pose[1], pose[2], orientaion[0], orientaion[1], orientaion[2]]
         pos = self.get_current_position()
         orien = self.get_current_orientain()
         current = [pos.x, pos.y, pos.z, orien[0], orien[1], orien[2]]
-        accuracy = self.all_close(goal, current, self.tolerance) #?
+        accuracy = self.all_close(goal, current, self.tolerance) #?'''
         accuracy = True #?
         return accuracy and plan, sim_time, ind
 
@@ -612,7 +620,8 @@ class UrdfClass(object):
 
     @staticmethod
     def urdf_write(data, filename = str(datetime.now())):
-        fil = open(filename + '.urdf.xacro', 'w')
+        path='/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/'
+        fil = open(path+filename + '.urdf.xacro', 'w')
         fil.write(data)
         fil.close()
 
@@ -719,7 +728,7 @@ def main_move_group():
     #            [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0],
     #            [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0], [0, 3.1459*0.36, 0]]
     results = []
-    for i in range(len(poses)):
+    for i in range(len(grapes_coords)):
         pose = poses[i]
         orientaion = oriens[i]
         results.append(manipulator.go_to_pose_goal(pose, orientaion))
