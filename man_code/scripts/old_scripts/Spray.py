@@ -38,17 +38,17 @@ class Spray():
 
 		self.plan_results=[]
 		self.move_duration=[]
-		grapes_coords=  [[1.2,2.9,1.5]]
-						 # [1.14,2.08,1.57],
-						 # [1.51,1.42,1.85],
-						 # [1.26,0.08,2.06],
+		grapes_coords=  [[1.2,2.9,1.5],
+						 [1.14,2.08,1.57],
+						 [1.51,1.42,1.85],
+						 [1.26,0.08,2.06],
 
-						 # [1.05,-0.15,1.3],
-						 # [1.43,-1.53,1.47],
-						 # [1.18,-1.42,1.6],
-						 # [1.1,-3.15,1.5],
-						 # [1.16,-4.2,1.7],
-						 # [1.4,-4.5,1.8]]
+						 [1.05,-0.15,1.3],
+						 [1.43,-1.53,1.47],
+						 [1.18,-1.42,1.6],
+						 [1.1,-3.15,1.5],
+						 [1.16,-4.2,1.7],
+						 [1.4,-4.5,1.8]]
 		self.grapes_positions = grapes_coords
 		self.path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/"  
 
@@ -56,18 +56,15 @@ class Spray():
 
 	def go_home(self):
 		# home = self.move_group.get_current_joint_values()
-		home = geometry_msgs.msg.Pose()
-		# print(home)
-		home.orientation.w = 1
-		'''home[1] = 0
-		home[2] = 0
-		home[3] = 0
-		home[4] = 0
-		home[5] = 0
-		home[6] = 0'''
-		self.move_group.go(home, wait=True)
+		
+		
+		   
+		is_reached=self.move_group.go(self.home, wait=True)
 		self.move_group.stop()
-		print('Home position reached')
+		if(is_reached):
+			print('Home position reached')
+		else:
+			print('FAILED to reach home')
 
 	# new_pos = move_group.get_current_joint_values()
 	# new_pos[0] = 1
@@ -113,10 +110,10 @@ class Spray():
 	
 	def start_spray(self):
 		print('start_spray')
-		# self.go_home()
-		# for goal in self.grapes_positions:
-		# 	self.go_pose(goal)
-		# 	self.go_home()
+		# self.home= self.move_group.get_current_pose()
+		for goal in self.grapes_positions:
+			self.go_pose(goal)
+			# self.go_home()
 
 	def indices_calc(self, joints, links):
 	    try:
