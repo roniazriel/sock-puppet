@@ -16,13 +16,14 @@ from datetime import datetime
 import csv
 import numpy as np
 import pandas as pd
+import random
 from itertools import product
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 
 
 class Spray():
-    def __init__(self):
+    def __init__(self,arm_name):
         try:
           from math import pi, tau, dist, fabs, cos
         except: # For Python 2 compatibility
@@ -34,6 +35,8 @@ class Spray():
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('spray', anonymous=True)
 
+        self.arm_name = arm_name
+
         self.robot = moveit_commander.RobotCommander()
 
         self.scene = moveit_commander.PlanningSceneInterface()
@@ -41,15 +44,12 @@ class Spray():
         self.group_name = "manipulator"
         self.move_group = moveit_commander.MoveGroupCommander(self.group_name)
 
-        self.plan_results=[]
-        self.move_duration=[]
-        self.performance_indicators=[]
         grapes_coords=  [[1.2,2.9,1.5],
                          [1.14,2.08,1.57],
                          [1.51,1.42,1.85],
                          [1.26,0.08,2.06],
 
-                         [1.05,-0.15,1.3],
+                         [1.05,-0.15,1.2],
                          [1.43,-1.53,1.47],
                          [1.18,-1.42,1.6],
                          [1.1,-3.15,1.5],
@@ -57,8 +57,6 @@ class Spray():
                          [1.4,-4.5,1.8]]
         self.grapes_positions = grapes_coords
         self.path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/"  
-
-
 
     def go_home(self):
         # home = self.move_group.get_current_joint_values()   
@@ -69,54 +67,61 @@ class Spray():
         else:
             print('FAILED to reach home')
 
-    # new_pos = move_group.get_current_joint_values()
-    # new_pos[0] = 1
-
-    def go_pose(self,goal, joints, links):
-        spray_offset_x = 0.35
-        vine_offset_x = 0.25
+    def go_pose(self,goal, joints, links,db,pose_id):
+        spray_offset_x = 0.2
+        #vine_offset_x = 0.25
         start = time.time()
         pose_goal = geometry_msgs.msg.Pose()
-        pose_goal.orientation.w = 1
-        pose_goal.position.x = goal[0] - spray_offset_x- vine_offset_x
+        pose_goal.orientation.w = 0.707
+        pose_goal.orientation.y = 0.707
+        pose_goal.position.x = goal[0] - spray_offset_x
         pose_goal.position.y = goal[1]
         pose_goal.position.z = goal[2]
 
         self.move_group.set_pose_target(pose_goal)
-        self.plan_result = self.move_group.go(wait=True)
-        self.plan_results.append(self.plan_result)
-        self.move_group.stop()
+
+        # with movement:
+        # self.plan_result = self.move_group.go(wait=True)
+        # self.move_group.stop()
+
+        # only plan- without reaching the target
+        self.plan_result = self.move_group.plan()
+        self.plan_result = not(self.plan_result.joint_trajectory.points == [])
         end = time.time()
         print('Time:',end - start)
-        self.move_duration.append(end - start)
+        Time = end-start
         self.move_group.clear_pose_targets()
 
         if(self.plan_result):
             print("Success - A plan was created")
             performance = self.indices_calc(joints, links)
-            self.performance_indicators.append(performance)
-            time.sleep(5) # spraying time
+            time.sleep(0.1) # spraying time
             print('Goal position reached')
         else:
             print("Failed - The goal is out of reach")
-            self.performance_indicators.append(" ")
-            time.sleep(3)# sad
+            performance = ""
+            time.sleep(0.1) # pause
 
-        print(self.move_duration)
-        print(self.plan_results)
-
-        pd.DataFrame(self.move_duration).to_csv(self.path +"results/move_duration.csv", header=None, index=None)
-        pd.DataFrame(self.plan_results).to_csv(self.path +"results/plan_results.csv", header=None, index=None)
-        pd.DataFrame(self.grapes_positions).to_csv(self.path +"results/grapes_coords.csv", header=None, index=None)
-        pd.DataFrame(self.performance_indicators).to_csv(self.path +"results/performance_indicators.csv", header=None, index=None)
-
+        pose_db = self.write_indicators_to_csv(db,pose_id,Time,self.plan_result,performance) 
+        return pose_db
     
-    def start_spray(self,joints,links):
+    def write_indicators_to_csv(self,db,pose_id,Time,plan_result,performance):
+        db = db.append({'Arm ID': self.arm_name,
+                                    'Point number': pose_id,
+                                    'Move duration': Time,
+                                    'Sucsses': plan_result,
+                                    'Manipulability': performance,
+                                    'Mid joint proximity':performance},ignore_index=True)
+        return db
+    
+    
+    def start_spray(self,joints,links,db):
         print('start_spray')
-        # self.home= self.move_group.get_current_pose()
+        pose_id = 1
         for goal in self.grapes_positions:
-            self.go_pose(goal, joints,links)
-            # self.go_home()
+            db = self.go_pose(goal,joints,links,db,pose_id)
+            pose_id +=1
+        return db
 
     def indices_calc(self, joints, links):
         try:
@@ -155,10 +160,17 @@ class Spray():
 
 class simulation(object):
 
-    def __init__(self):
+    def __init__(self, joint_types,joint_axis,links,arm_name):
         self.path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/"
-        self.dof=6
+        if joint_types is None:
+            self.dof=6
+        else:
+            self.dof= len(joint_types)
         self.arms=[]
+        self.joint_types =joint_types
+        self.joint_axis=joint_axis
+        self.links = links
+        self.arm_name = arm_name
 
         
     def ter_command(self,command):
@@ -224,32 +236,32 @@ class simulation(object):
         links_length = [[0.1] + list(tup) for tup in
                         list(product(lengths_2_check, repeat=(self.dof - 1)))]
         for link in links_length:
-            if sum(link) > min_length:
+            if sum(link) >= min_length:
                 links.append([str(x) for x in link])
         return links
 
-    def create_urdf_from_csv(self, csv_name="all_configs", folder="arms"):
+    def create_urdf_from_csv(self, csv_name="all_configs6", folder="arms", num_of_group=2, min_length=1.4): # - create all the urdf for possible robotic models
         # read from csv file with all the possible configuration for manipulators
         base_path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/man_gazebo/urdf/"
         configs = self.read_data(base_path+csv_name)
         # Create the urdf files
         data = []
         self.create_folder(base_path + str(self.dof) + "dof/"+ folder)
-        links = self.set_links_length()
+        links = self.set_links_length(min_length = min_length)
         index = 0
-        folder_num = 0
         for config in configs:
             for arm in config:
-                for link in links:
+                random_links = random.sample(links,num_of_group)
+                for link in random_links:
                     self.arms.append(create_arm(arm["joint"], arm["axe"], link, folder))
                     path = base_path + str(len(arm["axe"])) + "dof/" + folder + "/"
-                    self.arms[index]["arm"].urdf_write(self.arms[index]["arm"].urdf_data(),
-                                                       path + self.arms[index]["name"])
+                    #self.arms[index]["arm"].urdf_write(self.arms[index]["arm"].urdf_data(),
+                     #                                  path + self.arms[index]["name"])
                     data.append([self.arms[index]["name"].replace(" ", ""), folder, datetime.now().strftime("%d_%m_%y")])
                     index = index+1
         print(data,"data")
-        print(arms, "arms")
-        # self.save_json("created arms", data)
+        print("number of arms: ",len(data))
+        #print(self.arms, "arms")
 
     def read_data(self, file_name):
         with open(file_name + ".csv", 'r') as _filehandler:
@@ -283,58 +295,92 @@ class simulation(object):
         return manip_array_of_dict
 
 
-    # Generate URDF
-    def generate_urdf(self,interface_joints, joint_parent_axis, links, file_name, folder):
-        if interface_joints is None:
-            interface_joints =["roll","roll", "roll", "roll", "roll", "roll"]
-        if joint_parent_axis is None:
-            joint_parent_axis =['z', 'y', 'y', 'y', 'y', 'z']
-        if links is None:
-            links = ['0.1', '0.7', '0.4', '0.7', '0.1', '0.6']
-        if file_name is None:
-            file_name = "test_arm"
-        if folder is None:
-            folder = "folder"
+    # Generate URDF by given inputs
+    def generate_urdf(self):
+        if self.joint_types is None:
+            self.joint_types =["roll","pitch", "pitch", "pitch", "pitch", "roll"]
+        if self.joint_axis is None:
+            self.joint_axis =['y', 'x', 'y', 'y', 'y', 'z']
+        if self.links is None:
+            self.links = ['0.1', '0.7', '0.6', '0.7', '0.2', '0.1']
 
-        self.dof = len(interface_joints)
-        arm = create_arm(interface_joints, joint_parent_axis, links, folder)
+        self.dof = len(self.joint_types)
+        arm = create_arm(self.joint_types, self.joint_axis, self.links)
         arm_name = arm["name"]
         print(arm_name)
-        return interface_joints, joint_parent_axis, links
+        return arm_name
 
 
     # Launch URDF Model
-    def launch_model(self):
-        main_launch_arg = ["gazebo_gui:=false", "rviz:=true", "dof:=" + "6" + "dof", "man:= manipulator"]
+    def launch_model(self, man="manipulator"):
+        main_launch_arg = ["gazebo_gui:=false", "rviz:=false", "dof:=" + "6" + "dof", "man:=" + man]
         launch = self.start_launch("main", self.path, "man_gazebo", main_launch_arg)  # main launch file
         return launch
 
 
     # spray 10 clusters and take measurments
-    def performe_spray(self,joints,links):
-        spray = Spray()
-        spray.start_spray(joints,links)
+    def performe_spray(self,db):
+        joints = self.joint_types
+        links =self.links
+        spray = Spray(arm_name=self.arm_name)
+        points_db = spray.start_spray(joints,links,db)
+        print(points_db,"performe_spray")
+        return points_db
 
 
-    def simulate(self):
-        joints, joint_parent_axis, links = self.generate_urdf(None, None, None ,None, None)
-        launch = self.launch_model()
-        self.performe_spray(joints,links)
+    def simulate(self,db):
+       #joints, joint_parent_axis, links, arm_name = self.generate_urdf(None, None, None ,None, None)
+        start_sim = time.time()
+        launch = self.launch_model(man=self.arm_name)
+        launch_time = time.time()
+        simulation_db = self.performe_spray(db)
+        end_spary = time.time()
         launch.shutdown() # kill proccess
-
+        shutdown_time = time.time()
+        print("launch time: ",launch_time - start_sim)
+        print("spary with movement time: ",end_spary - launch_time)
+        print("shutdown time: ",shutdown_time - end_spary)
+        print("total time with reaching clusters:" ,shutdown_time - start_sim)
+        print(simulation_db,"simulate")
+        return simulation_db
 
 if __name__ == '__main__':
-    simulation = simulation()
-    # simulation.simulate()
-    # links = simulation.set_links_length()
-    # print("number of options is: ", len(links))
-    # 6dof_configs = pd.read_csv("/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/all_configs.csv", header=None, nrows=68359)
-    # print(df_6dof)
+    ''' Runing simulation- Go through all URDF files in 6dof/arms folder
+        all simulations data is saved in sim_results file
+        all URDFs has to be saved in a configuration name format
+    '''
+    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Sucsses", "Manipulability", "Mid joint proximity"])
+    directory = '/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'
+    file_number=999
+    for filename in os.listdir(directory):
+        f = os.path.join(directory, filename)
+        # checking if it is a file
+        if os.path.isfile(f):
+            head,arm_name = os.path.split(f[0:-11])
+            configuration = arm_name.split("_")
+            configuration = configuration[1:]
+            joint_types=[]
+            joint_axis=[]
+            links=[]
+            for i in range(0,len(configuration)-3,4):
+                joint_types.append(configuration[i])
+                joint_axis.append(configuration[i+1])
+                links.append(configuration[i+2]+"."+configuration[i+3])
 
-    # file = simulation.read_data('/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/all_configs')
-    # print(file)
+            sim = simulation(joint_types,joint_axis,links, arm_name)    
+            simulation_db = sim.simulate(simulation_db)          
+            print(simulation_db)
+            file_number +=1
+            if file_number % 1000 == 0 :
+                pd.DataFrame(simulation_db).to_csv(os.environ['HOME'] + "/catkin_ws/src/sock-puppet/" +"results/sim_results"+str(file_number)+".csv")
 
-    #simulation.create_urdf_from_csv()
 
-    
+    ''' Creating the folder that contains all the sampled robotic arms (URDFs)
+    '''
+    # sim = simulation(None, None, None ,None)  
+    # sim.create_urdf_from_csv(csv_name="all_configs6_part1", folder="arms1", num_of_group=10, min_length=1.65)
+
+
+
+ 
 

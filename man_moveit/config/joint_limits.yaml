@@ -37,7 +37,7 @@ joint_limits:
     max_velocity: 20.2
     has_acceleration_limits: True
     max_acceleration: 3.2
-  fake_joint:
+  sprayer_joint:
     has_velocity_limits: True
     max_velocity: 20.2
     has_acceleration_limits: True

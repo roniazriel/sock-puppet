@@ -14,10 +14,10 @@
 	<disable_collisions link1="link3" link2="link4" reason="Adjacent" /> 
 	<disable_collisions link1="link4" link2="link5" reason="Adjacent" />
 	<disable_collisions link1="link5" link2="link6" reason="Adjacent" />
-	<disable_collisions link1="link6" link2="camera_link" reason="Adjacent" />
-	<disable_collisions link1="ee_link" link2="camera_link" reason="Adjacent" />
+	<disable_collisions link1="link6" link2="sprayer_link" reason="Adjacent" />
+	<disable_collisions link1="sprayer_link" link2="ee_link" reason="Adjacent" />
 	<disable_collisions link1="ee_link" link2="link5" reason="Never" />
 	<disable_collisions link1="ee_link" link2="link6" reason="Never" />
 	<disable_collisions link1="base_link" link2="link1" reason="Never" />
-	<disable_collisions link1="camera_link" link2="link5" reason="Never" />
+	<disable_collisions link1="sprayer_link" link2="link5" reason="Never" />
 </robot>

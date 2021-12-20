@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 
-def create_arm(interface_joints, joint_parent_axis, links, folder):
+def create_arm(interface_joints, joint_parent_axis, links, folder="folder"):
     """create the desired arm
         interface_joints- roll,pitch,yaw or prismatic
                          roll - revolute around own Z axe
@@ -21,7 +21,8 @@ def create_arm(interface_joints, joint_parent_axis, links, folder):
     pitchz_number = 1
     prisy_number = -1
     for i in range(len(joint_parent_axis)):
-        file_name += interface_joints[i].replace(" ", "") + "_" + joint_parent_axis[i].replace(" ", "") + "_" + links[i].replace(".", "_")
+        #set the file name by it's configuration
+        file_name += "_" + interface_joints[i].replace(" ", "") + "_" + joint_parent_axis[i].replace(" ", "") + "_" + links[i].replace(".", "_")
         if interface_joints[i].replace(" ", "") == "roll":
             joints.append("revolute")
             joint_axis.append('z')
@@ -88,20 +89,17 @@ class UrdfClass(object):
 
     def calc_weight(self):
         """
-        this function calculate the weight of the links according to accumulated weight and length of arm
-        :return: weights- the weight [kg] of each link - list of strings  (from the 2nd link)
+            defining mass value for each link
         """
-        coeffs = [8.79055, 4.2928]  # the coeffs of the linear eauation (found according UR5 and motoman)
-        weights = [0]  # the wieght of each link
-        acc_length = 0  # accumelated length
-        acc_weight = 0  # accumelated weight
-        for link in self.links[1:]:
-            acc_length = acc_length + float(link)
-            weights.append(round(acc_length * coeffs[0] + coeffs[1] - acc_weight, 2))
-            acc_weight = acc_weight + weights[-1]
-        while len(weights) < 7:
-            weights.append(1)
-        return [str(weight) for weight in weights]
+        cumulative_length = 0
+        cumulative_weight = 0
+        link_mass = []
+        for l in self.links:
+            cumulative_length += float(l)
+            mass = cumulative_length * 7.3149 + 1.1755 - cumulative_weight
+            link_mass.append(str(mass))
+            cumulative_weight += mass
+        return link_mass
 
     def urdf_data(self):
         head = '''<?xml version="1.0"?>
@@ -145,13 +143,14 @@ class UrdfClass(object):
 
         inertia_parameters = '''
         <xacro:property name="base_radius" value="0.060" />
-        <xacro:property name="link0_radius" value="0.060" /> 
         <xacro:property name="base_length"  value="11" /> 
-        <xacro:property name="base_height"  value="0.5" />
+        <xacro:property name="base_height"  value="1" />
+        <xacro:property name="base_width"  value="0.5" />
+        <xacro:property name="base_mass" value="44" />
+
 
             <!-- Inertia parameters -->
-        <xacro:property name="base_mass" value="1.0" />
-        <xacro:property name="link0_mass" value="40.7" />
+        <xacro:property name="link0_mass" value="7" />
         <xacro:property name="link1_mass" value="3.7" />
         <xacro:property name="link2_mass" value="''' + self.weights[1] + '''" />
         <xacro:property name="link3_mass" value="''' + self.weights[2] + '''" />
@@ -159,6 +158,7 @@ class UrdfClass(object):
         <xacro:property name="link5_mass" value="''' + self.weights[4] + '''" />
         <xacro:property name="link6_mass" value="''' + self.weights[5] + '''" />
 
+        <xacro:property name="link0_radius" value="0.060" /> 
         <xacro:property name="link1_radius" value="0.049" />
         <xacro:property name="link2_radius" value="0.045" />
         <xacro:property name="link3_radius" value="0.040" />
@@ -172,13 +172,13 @@ class UrdfClass(object):
           <visual>
                 <origin xyz="0 0 ${base_height/2}" rpy="0 0 0" /> 
             <geometry>
-                    <box size="${base_height} ${base_length} ${base_height}"/> 
+                    <box size="${base_width} ${base_length} ${base_height}"/> 
             </geometry>
           </visual>
           <collision>
                  <origin xyz="0 0 ${base_height/2}" rpy="0 0 0" /> 
             <geometry>
-                    <box size="${base_length} ${base_length} ${base_height}"/>  
+                    <box size="${base_width} ${base_length} ${base_height}"/>  
             </geometry>
           </collision>
           <inertial>
@@ -232,10 +232,10 @@ class UrdfClass(object):
             data = data + self.joint_create(i + 1) + self.link_create(i + 1)
 
         tail = '''
-        <!-- camera joint - fictive joint -->
-        <joint name="camera_joint" type="revolute">
+        <!-- Sprayer joint - fictive joint -->
+        <joint name="sprayer_joint" type="revolute">
             <parent link="${prefix}link''' + str(self.links_number) + '''" />
-            <child link = "camera_link" />
+            <child link = "sprayer_link" />
             <origin xyz="0.0  0.0 ${link''' + str(self.links_number) + '''_length}" rpy="0.0 0.0 0" />
             <axis xyz="0 0 1"/>
             <xacro:joint_limit joint_type="revolute" link_length="0.1"/>
@@ -243,8 +243,8 @@ class UrdfClass(object):
         </joint>
         
 
-        <!-- Camera -->
-        <link name="camera_link">
+        <!-- Sprayer -->
+        <link name="sprayer_link">
           <collision>
             <origin rpy="0 0 0" xyz="0 0 0.005"/>
             <geometry>
@@ -273,7 +273,7 @@ class UrdfClass(object):
 
             <!-- ee joint -->
         <joint name="${prefix}ee_fixed_joint" type="fixed">
-          <parent link="camera_link" />
+          <parent link="sprayer_link" />
           <child link = "${prefix}ee_link" />
           <origin xyz="0.0  0.0 0.01" rpy="0.0 0.0 0" />
         </joint>
@@ -400,8 +400,8 @@ class UrdfClass(object):
 
     @staticmethod
     def urdf_write(data, filename = str(datetime.now())):
-        #path='/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/'
-        fil = open(filename + '.urdf.xacro', 'w')
+        path='/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'
+        fil = open(path+filename + '.urdf.xacro', 'w')
         fil.write(data)
         fil.close()
 
