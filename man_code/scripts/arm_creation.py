@@ -233,9 +233,9 @@ class UrdfClass(object):
 
         tail = '''
         <!-- Sprayer joint - fictive joint -->
-        <joint name="sprayer_joint" type="revolute">
+        <joint name="camera_joint" type="revolute">
             <parent link="${prefix}link''' + str(self.links_number) + '''" />
-            <child link = "sprayer_link" />
+            <child link = "camera_link" />
             <origin xyz="0.0  0.0 ${link''' + str(self.links_number) + '''_length}" rpy="0.0 0.0 0" />
             <axis xyz="0 0 1"/>
             <xacro:joint_limit joint_type="revolute" link_length="0.1"/>
@@ -244,7 +244,7 @@ class UrdfClass(object):
         
 
         <!-- Sprayer -->
-        <link name="sprayer_link">
+        <link name="camera_link">
           <collision>
             <origin rpy="0 0 0" xyz="0 0 0.005"/>
             <geometry>
@@ -273,7 +273,7 @@ class UrdfClass(object):
 
             <!-- ee joint -->
         <joint name="${prefix}ee_fixed_joint" type="fixed">
-          <parent link="sprayer_link" />
+          <parent link="camera_link" />
           <child link = "${prefix}ee_link" />
           <origin xyz="0.0  0.0 0.01" rpy="0.0 0.0 0" />
         </joint>

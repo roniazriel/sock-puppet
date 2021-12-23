@@ -68,13 +68,14 @@ class Spray():
             print('FAILED to reach home')
 
     def go_pose(self,goal, joints, links,db,pose_id):
-        spray_offset_x = 0.2
-        #vine_offset_x = 0.25
+        spray_offset_x = 0.35
+        vine_offset_x = 0.25
         start = time.time()
         pose_goal = geometry_msgs.msg.Pose()
-        pose_goal.orientation.w = 0.707
-        pose_goal.orientation.y = 0.707
-        pose_goal.position.x = goal[0] - spray_offset_x
+        # pose_goal.orientation.w = 0.707
+        # pose_goal.orientation.y = 0.707
+        pose_goal.orientation.w = 1
+        pose_goal.position.x = goal[0] - spray_offset_x - vine_offset_x
         pose_goal.position.y = goal[1]
         pose_goal.position.z = goal[2]
 
@@ -300,7 +301,7 @@ class simulation(object):
         if self.joint_types is None:
             self.joint_types =["roll","pitch", "pitch", "pitch", "pitch", "roll"]
         if self.joint_axis is None:
-            self.joint_axis =['y', 'x', 'y', 'y', 'y', 'z']
+            self.joint_axis =['z', 'y', 'y', 'y', 'y', 'z']
         if self.links is None:
             self.links = ['0.1', '0.7', '0.6', '0.7', '0.2', '0.1']
 
@@ -380,7 +381,9 @@ if __name__ == '__main__':
     # sim = simulation(None, None, None ,None)  
     # sim.create_urdf_from_csv(csv_name="all_configs6_part1", folder="arms1", num_of_group=10, min_length=1.65)
 
-
-
+    ''' Creating 1 URDF
+    '''
+    # sim = simulation(None, None, None ,None)  
+    # sim.generate_urdf()
  
 

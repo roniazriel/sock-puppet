@@ -22,10 +22,10 @@
 	<include file="$(find man_moveit)/launch/man_moveit_planning_execution.launch">
 		<arg name="dof" value="$(arg dof)" />
 	</include>
-	<!-- show in rviz- just for visulize or to move the manipulator manually 
-  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find man_moveit)/rviz/sock.rviz" /> -->
+	<!-- show in rviz- just for visulize or to move the manipulator manually -->
 
-	<!-- <include if="$(arg rviz)" file="$(find man_moveit)/launch/sock_rviz.rviz"/>  -->
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find man_moveit)/rviz/sock.rviz" /> 
+	<!--  <include if="$(arg rviz)" file="$(find man_moveit)/launch/sock.rviz"/> -->
 
 
 </launch>
