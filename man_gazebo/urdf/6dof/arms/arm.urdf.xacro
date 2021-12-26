@@ -50,7 +50,8 @@
         
         
         <xacro:property name="base_length"  value="11" /> 
-        <xacro:property name="base_height"  value="0.5" />
+        <xacro:property name="base_height"  value="1" />
+	<xacro:property name="base_width"  value="0.5" />
         <xacro:property name="link0_length" value="0.25" />
         <xacro:property name="link1_length" value="0.75" /> 
         <xacro:property name="link2_length" value="0.75" />
@@ -94,13 +95,13 @@
       <visual>
 		    <origin xyz="0 0 ${base_height/2}" rpy="0 0 0" /> 
         <geometry>
- 			    <box size="${base_height} ${base_length} ${base_height}"/> 
+ 			    <box size="${base_width} ${base_length} ${base_height}"/> 
         </geometry>
       </visual>
       <collision>
 			 <origin xyz="0 0 ${base_height/2}" rpy="0 0 0" /> 
         <geometry>
-			    <box size="${base_length} ${base_length} ${base_height}"/> 	
+			    <box size="${base_width} ${base_length} ${base_height}"/> 	
         </geometry>
       </collision>
       <inertial>

@@ -233,7 +233,7 @@ class UrdfClass(object):
 
         tail = '''
         <!-- Sprayer joint - fictive joint -->
-        <joint name="camera_joint" type="revolute">
+        <joint name="fake_joint" type="revolute">
             <parent link="${prefix}link''' + str(self.links_number) + '''" />
             <child link = "camera_link" />
             <origin xyz="0.0  0.0 ${link''' + str(self.links_number) + '''_length}" rpy="0.0 0.0 0" />

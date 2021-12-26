@@ -20,6 +20,7 @@ import random
 from itertools import product
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
+import math
 
 
 class Spray():
@@ -32,8 +33,8 @@ class Spray():
           def dist(p, q):
             return sqrt(sum((p_i - q_i)**2.0 for p_i, q_i in zip(p,q)))
 
-        moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('spray', anonymous=True)
+        moveit_commander.roscpp_initialize(sys.argv)
 
         self.arm_name = arm_name
 
@@ -43,18 +44,19 @@ class Spray():
 
         self.group_name = "manipulator"
         self.move_group = moveit_commander.MoveGroupCommander(self.group_name)
+        self.move_group.set_planning_time(1.5)
 
         grapes_coords=  [[1.2,2.9,1.5],
                          [1.14,2.08,1.57],
-                         [1.51,1.42,1.85],
-                         [1.26,0.08,2.06],
+                         [1.5,1.42,1.8],
+                         [1.5,0.08,1.2],
 
-                         [1.05,-0.15,1.2],
+                         [1.8,-0.15,1.2],
                          [1.43,-1.53,1.47],
                          [1.18,-1.42,1.6],
                          [1.1,-3.15,1.5],
                          [1.16,-4.2,1.7],
-                         [1.4,-4.5,1.8]]
+                         [1.8,-4.5,1.8]]
         self.grapes_positions = grapes_coords
         self.path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/"  
 
@@ -68,13 +70,13 @@ class Spray():
             print('FAILED to reach home')
 
     def go_pose(self,goal, joints, links,db,pose_id):
-        spray_offset_x = 0.35
-        vine_offset_x = 0.25
+        spray_offset_x = 0.2
+        vine_offset_x = 0.8
         start = time.time()
         pose_goal = geometry_msgs.msg.Pose()
-        # pose_goal.orientation.w = 0.707
-        # pose_goal.orientation.y = 0.707
-        pose_goal.orientation.w = 1
+        pose_goal.orientation.w = 0.707
+        pose_goal.orientation.y = 0.707
+        # pose_goal.orientation.w = 1
         pose_goal.position.x = goal[0] - spray_offset_x - vine_offset_x
         pose_goal.position.y = goal[1]
         pose_goal.position.z = goal[2]
@@ -95,24 +97,27 @@ class Spray():
 
         if(self.plan_result):
             print("Success - A plan was created")
-            performance = self.indices_calc(joints, links)
+            mu,z,jacobian,cur_pose,mu_roni = self.indices_calc(joints, links)
             time.sleep(0.1) # spraying time
             print('Goal position reached')
         else:
             print("Failed - The goal is out of reach")
-            performance = ""
+            mu,z,jacobian,cur_pose,mu_roni = "","","","",""
             time.sleep(0.1) # pause
 
-        pose_db = self.write_indicators_to_csv(db,pose_id,Time,self.plan_result,performance) 
+        pose_db = self.write_indicators_to_csv(db,pose_id,Time,self.plan_result,mu,z,jacobian,cur_pose,mu_roni) 
         return pose_db
     
-    def write_indicators_to_csv(self,db,pose_id,Time,plan_result,performance):
+    def write_indicators_to_csv(self,db,pose_id,Time,plan_result,mu,z,jacobian,cur_pose,mu_roni):
         db = db.append({'Arm ID': self.arm_name,
                                     'Point number': pose_id,
                                     'Move duration': Time,
                                     'Sucsses': plan_result,
-                                    'Manipulability': performance,
-                                    'Mid joint proximity':performance},ignore_index=True)
+                                    'Manipulability - mu': mu,
+                                    'Manipulability - jacobian': jacobian,
+                                    'Manipulability - cur pose': cur_pose,
+                                    'Manipulability - roni': mu_roni,
+                                    'Mid joint proximity': z},ignore_index=True)
         return db
     
     
@@ -128,16 +133,19 @@ class Spray():
         try:
             # ignoring the final joint which is a roll
             cur_pos = self.move_group.get_current_joint_values()
+            print(cur_pos,"cur")
             jacobian = np.delete(self.move_group.get_jacobian_matrix(cur_pos), -1, 1)
             cur_pos = np.asarray(cur_pos)
             # Jacobian singular values (~eighen values)
             j_ev = np.linalg.svd(jacobian, compute_uv=False)
             # Manipulability index
+            mu_roni= math.sqrt(np.linalg.det(np.matmul(jacobian,(np.transpose(jacobian)))))
             mu = round(np.product(j_ev), 3)
             # Joint Mid-Range Proximity
             z = self.mid_joint_proximity(cur_pos, joints, links)
-            return mu, np.diag(z), jacobian, cur_pos
+            return mu, np.diag(z), jacobian, cur_pos,mu_roni
         except:
+            print("indices_calc - except")
             # if there numeric error like one of the values is NaN or Inf or divided by zero
             return -1, 1, np.asarray([-1]*len(joints)), jacobian, cur_pos
 
@@ -225,7 +233,7 @@ class simulation(object):
             mkdir(name)
         return name
 
-    def set_links_length(self, min_length=1.4, link_min=0.1, link_interval=0.2, link_max=0.71):
+    def set_links_length(self, min_length=1, max_lenght = 2, link_min=0.1, link_interval=0.2, link_max=0.71):
     # set all the possible links lengths in the defind interval
     # :param min_length: the minimum length of all the links
     # :param link_min: minimum length of a link
@@ -237,7 +245,7 @@ class simulation(object):
         links_length = [[0.1] + list(tup) for tup in
                         list(product(lengths_2_check, repeat=(self.dof - 1)))]
         for link in links_length:
-            if sum(link) >= min_length:
+            if sum(link) >= min_length and sum(link) <= max_length :
                 links.append([str(x) for x in link])
         return links
 
@@ -299,11 +307,11 @@ class simulation(object):
     # Generate URDF by given inputs
     def generate_urdf(self):
         if self.joint_types is None:
-            self.joint_types =["roll","pitch", "pitch", "pitch", "pitch", "roll"]
+            self.joint_types =["roll","pitch", "pitch", "pris", "pris", "pris"]
         if self.joint_axis is None:
-            self.joint_axis =['z', 'y', 'y', 'y', 'y', 'z']
+            self.joint_axis =['z', 'z', 'y', 'z', 'x', 'z']
         if self.links is None:
-            self.links = ['0.1', '0.7', '0.6', '0.7', '0.2', '0.1']
+            self.links = ['0.1', '0.3', '0.3', '0.5', '0.5', '0.1']
 
         self.dof = len(self.joint_types)
         arm = create_arm(self.joint_types, self.joint_axis, self.links)
@@ -350,9 +358,9 @@ if __name__ == '__main__':
         all simulations data is saved in sim_results file
         all URDFs has to be saved in a configuration name format
     '''
-    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Sucsses", "Manipulability", "Mid joint proximity"])
+    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Sucsses", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Mid joint proximity",""])
     directory = '/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'
-    file_number=999
+    file_number=998
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
         # checking if it is a file
@@ -383,7 +391,6 @@ if __name__ == '__main__':
 
     ''' Creating 1 URDF
     '''
-    # sim = simulation(None, None, None ,None)  
-    # sim.generate_urdf()
- 
-
+ #    sim = simulation(None, None, None ,None)  
+ #    sim.generate_urdf()
+ # 
