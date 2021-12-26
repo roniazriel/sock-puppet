@@ -134,6 +134,8 @@ class Spray():
             # ignoring the final joint which is a roll
             cur_pos = self.move_group.get_current_joint_values()
             print(cur_pos,"cur")
+            #cur_pos = ""
+            #jacobian=""
             jacobian = np.delete(self.move_group.get_jacobian_matrix(cur_pos), -1, 1)
             cur_pos = np.asarray(cur_pos)
             # Jacobian singular values (~eighen values)
@@ -307,11 +309,11 @@ class simulation(object):
     # Generate URDF by given inputs
     def generate_urdf(self):
         if self.joint_types is None:
-            self.joint_types =["roll","pitch", "pitch", "pris", "pris", "pris"]
+            self.joint_types =["roll","pris", "roll", "roll", "roll", "pitch"]
         if self.joint_axis is None:
-            self.joint_axis =['z', 'z', 'y', 'z', 'x', 'z']
+            self.joint_axis =['z', 'z', 'y', 'y', 'y', 'z']
         if self.links is None:
-            self.links = ['0.1', '0.3', '0.3', '0.5', '0.5', '0.1']
+            self.links = ['0.1', '0.5', '0.3', '0.5', '0.3', '0.1']
 
         self.dof = len(self.joint_types)
         arm = create_arm(self.joint_types, self.joint_axis, self.links)
@@ -360,7 +362,7 @@ if __name__ == '__main__':
     '''
     simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Sucsses", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Mid joint proximity",""])
     directory = '/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'
-    file_number=998
+    file_number=994
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
         # checking if it is a file
@@ -391,6 +393,6 @@ if __name__ == '__main__':
 
     ''' Creating 1 URDF
     '''
- #    sim = simulation(None, None, None ,None)  
- #    sim.generate_urdf()
+    # sim = simulation(None, None, None ,None)  
+    # sim.generate_urdf()
  # 

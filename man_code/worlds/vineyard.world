@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <sdf version="1.4">
   <world name="default">
-<sim_time>0</sim_time>
-<!-- 
+<!-- <sim_time>0</sim_time>
+
 <real_time>150 50355967</real_time>
 <wall_time>1613581777 862209073</wall_time>-->
     <include>
