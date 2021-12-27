@@ -54,9 +54,9 @@ class Spray():
                          [1.8,-0.15,1.2],
                          [1.43,-1.53,1.47],
                          [1.18,-1.42,1.6],
-                         [1.1,-3.15,1.5],
-                         [1.16,-4.2,1.7],
-                         [1.8,-4.5,1.8]]
+                         [1.1,-2.15,1.5],
+                         [1.16,-3.2,1.7],
+                         [1.8,-4,1.8]]
         self.grapes_positions = grapes_coords
         self.path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/"  
 
@@ -149,7 +149,7 @@ class Spray():
         except:
             print("indices_calc - except")
             # if there numeric error like one of the values is NaN or Inf or divided by zero
-            return -1, 1, np.asarray([-1]*len(joints)), jacobian, cur_pos
+            return -1,np.asarray([-1]*len(joints)), jacobian, cur_pos , -1
 
     @staticmethod
     def mid_joint_proximity(cur_pos, joints, link_length):
@@ -247,7 +247,7 @@ class simulation(object):
         links_length = [[0.1] + list(tup) for tup in
                         list(product(lengths_2_check, repeat=(self.dof - 1)))]
         for link in links_length:
-            if sum(link) >= min_length and sum(link) <= max_length :
+            if sum(link) >= min_length and sum(link) <= max_lenght :
                 links.append([str(x) for x in link])
         return links
 
@@ -344,6 +344,7 @@ class simulation(object):
         start_sim = time.time()
         launch = self.launch_model(man=self.arm_name)
         launch_time = time.time()
+        time.sleep(10)
         simulation_db = self.performe_spray(db)
         end_spary = time.time()
         launch.shutdown() # kill proccess
@@ -395,4 +396,9 @@ if __name__ == '__main__':
     '''
     # sim = simulation(None, None, None ,None)  
     # sim.generate_urdf()
- # 
+ 
+    ''' Calculate links lenghts options amount
+    '''
+    # sim = simulation(None, None, None ,None)  
+    # links = sim.set_links_length()
+    # print("Links Lenghts options amount: ",len(links))

@@ -24,11 +24,11 @@
 
 
 
-<!--added 26/12 -->
+<!--added 26/12 
 
  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
 <param name="use_gui" value="true" />
-</node>
+</node> -->
 
   <node pkg="rosservice" type="rosservice" name="set_logger_level" args="call --wait /gazebo/set_logger_level &quot; {logger: 'ros', level: 'Fatal'} &quot;" respawn="false" />
 </launch>
