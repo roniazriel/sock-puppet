@@ -99,6 +99,10 @@ class UrdfClass(object):
             mass = cumulative_length * 7.3149 + 1.1755 - cumulative_weight
             link_mass.append(str(mass))
             cumulative_weight += mass
+        if len(link_mass) < 6: 
+            while len(link_mass) < 6:
+                fictive_mass = 0
+                link_mass.append(str(fictive_mass))
         return link_mass
 
     def urdf_data(self):
@@ -400,7 +404,7 @@ class UrdfClass(object):
 
     @staticmethod
     def urdf_write(data, filename = str(datetime.now())):
-        path='/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'
+        path='/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'
         fil = open(path+filename + '.urdf.xacro', 'w')
         fil.write(data)
         fil.close()
@@ -425,3 +429,4 @@ class UrdfClass(object):
             warning('wrong axe input.' + axe + ' entered. returning [0 0 0] ' + str(
                 datetime.datetime.now()))  # will print a message to the console
             return '0 0 0'
+

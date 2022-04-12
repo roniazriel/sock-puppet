@@ -165,8 +165,14 @@ class Spray():
         dis = (cur_pos[:-1]-theta_mean)
         nor_dis = np.asarray(np.abs(dis))/np.asarray(to_norm)
         w = np.identity(len(joints)+1)*nor_dis  # weighted diagonal matrix
+        print(w,"w")
+        print(nor_dis,"nor_dis")
         z = np.around(0.5*np.transpose(nor_dis)*w, 3)
+        print(z, "z")
         return z
+
+    def dexetry_index(self):
+        return
 
 
 class simulation(object):
@@ -361,30 +367,30 @@ if __name__ == '__main__':
         all simulations data is saved in sim_results file
         all URDFs has to be saved in a configuration name format
     '''
-    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Sucsses", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Mid joint proximity",""])
-    directory = '/home/roni/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'
-    file_number=994
-    for filename in os.listdir(directory):
-        f = os.path.join(directory, filename)
-        # checking if it is a file
-        if os.path.isfile(f):
-            head,arm_name = os.path.split(f[0:-11])
-            configuration = arm_name.split("_")
-            configuration = configuration[1:]
-            joint_types=[]
-            joint_axis=[]
-            links=[]
-            for i in range(0,len(configuration)-3,4):
-                joint_types.append(configuration[i])
-                joint_axis.append(configuration[i+1])
-                links.append(configuration[i+2]+"."+configuration[i+3])
+    # simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Sucsses", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Mid joint proximity",""])
+    # directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'
+    # file_number=994
+    # for filename in os.listdir(directory):
+    #     f = os.path.join(directory, filename)
+    #     # checking if it is a file
+    #     if os.path.isfile(f):
+    #         head,arm_name = os.path.split(f[0:-11])
+    #         configuration = arm_name.split("_")
+    #         configuration = configuration[1:]
+    #         joint_types=[]
+    #         joint_axis=[]
+    #         links=[]
+    #         for i in range(0,len(configuration)-3,4):
+    #             joint_types.append(configuration[i])
+    #             joint_axis.append(configuration[i+1])
+    #             links.append(configuration[i+2]+"."+configuration[i+3])
 
-            sim = simulation(joint_types,joint_axis,links, arm_name)    
-            simulation_db = sim.simulate(simulation_db)          
-            print(simulation_db)
-            file_number +=1
-            if file_number % 1000 == 0 :
-                pd.DataFrame(simulation_db).to_csv(os.environ['HOME'] + "/catkin_ws/src/sock-puppet/" +"results/sim_results"+str(file_number)+".csv")
+    #         sim = simulation(joint_types,joint_axis,links, arm_name)    
+    #         simulation_db = sim.simulate(simulation_db)          
+    #         print(simulation_db)
+    #         file_number +=1
+    #         if file_number % 1000 == 0 :
+    #             pd.DataFrame(simulation_db).to_csv(os.environ['HOME'] + "/catkin_ws/src/sock-puppet/" +"results/sim_results"+str(file_number)+".csv")
 
 
     ''' Creating the folder that contains all the sampled robotic arms (URDFs)
@@ -394,7 +400,11 @@ if __name__ == '__main__':
 
     ''' Creating 1 URDF
     '''
-    # sim = simulation(None, None, None ,None)  
+    # joint_types=["roll","roll", "roll", "pitch"]
+    # joint_axis= ['z', 'y', 'y', 'y']
+    # links =['0.1', '0.5', '0.5', '0.3']
+    # arm_name=None
+    # sim = simulation(joint_types, joint_axis, links ,arm_name)  
     # sim.generate_urdf()
  
     ''' Calculate links lenghts options amount
