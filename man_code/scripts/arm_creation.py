@@ -112,16 +112,16 @@ class UrdfClass(object):
         <xacro:include filename="$(find man_gazebo)/urdf/''' + str(self.links_number) + '''dof/transmission_''' + str(
             self.links_number) + '''dof.xacro" />
         <xacro:include filename="$(find man_gazebo)/urdf/gazebo.xacro" />
-        <xacro:macro name="cylinder_inertial" params="radius length mass *origin">
 
         <link name="world" />
-          <joint name="world_joint" type="fixed">
+        
+        <joint name="world_joint" type="fixed">
             <parent link="world" />
             <child link = "base_link" />
             <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
-          </joint>
+        </joint>
 
-
+        <xacro:macro name="cylinder_inertial" params="radius length mass *origin">
         <inertial>
           <mass value="${mass}" />
           <xacro:insert_block name="origin" />
@@ -171,6 +171,7 @@ class UrdfClass(object):
         <xacro:property name="link6_radius" value="0.025" /> '''
 
         base_link = '''
+
         <!-- Base Link -->
         <link name="${prefix}base_link" >
           <visual>
@@ -264,6 +265,14 @@ class UrdfClass(object):
             <origin xyz="0.0 0.0 0.005" rpy="0 0 0" />
           </xacro:cylinder_inertial>
         </link>
+
+        <!-- ee joint -->
+        <joint name="${prefix}ee_fixed_joint" type="fixed">
+          <parent link="camera_link" />
+          <child link = "${prefix}ee_link" />
+          <origin xyz="0.0  0.0 0.01" rpy="0.0 0.0 0" />
+        </joint>
+
             
         <!-- ee link -->
         <link name="${prefix}ee_link">
@@ -275,12 +284,6 @@ class UrdfClass(object):
           </collision>
         </link>
 
-            <!-- ee joint -->
-        <joint name="${prefix}ee_fixed_joint" type="fixed">
-          <parent link="camera_link" />
-          <child link = "${prefix}ee_link" />
-          <origin xyz="0.0  0.0 0.01" rpy="0.0 0.0 0" />
-        </joint>
         
             <xacro:arm_transmission prefix="${prefix}" />
             <xacro:arm_gazebo prefix="${prefix}" />

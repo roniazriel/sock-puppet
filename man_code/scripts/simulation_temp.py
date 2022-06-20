@@ -50,9 +50,6 @@ class Spray():
           def dist(p, q):
             return sqrt(sum((p_i - q_i)**2.0 for p_i, q_i in zip(p,q)))
 
-        rospy.init_node('spray', anonymous=True)
-
-        moveit_commander.roscpp_initialize(sys.argv)
 
         self.arm_name = arm_name
         self.robot = moveit_commander.RobotCommander()
@@ -217,7 +214,7 @@ class Spray():
 
 class simulation(object):
 
-    def __init__(self,joint_types,joint_axis,links,arm_name):
+    def __init__(self, joint_types,joint_axis,links,arm_name):
         self.path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/"
         if joint_types is None:
             self.dof=6
@@ -379,10 +376,15 @@ class simulation(object):
     def performe_spray(self,db):
         joints = self.joint_types
         links =self.links
+        rospy.init_node('spray', anonymous=True)
+        moveit_commander.roscpp_initialize(sys.argv)
+
         spray = Spray(arm_name=self.arm_name)
         points_db = spray.start_spray(joints,links,db)
-        print(points_db,"performe_spray")
+        print(points_db)
 
+        # Shut down MoveIt cleanly
+        moveit_commander.roscpp_shutdown()
         return points_db
 
 
@@ -390,13 +392,10 @@ class simulation(object):
         try:
            #joints, joint_parent_axis, links, arm_name = self.generate_urdf(None, None, None ,None, None)
             start_sim = time.time()
-            print("launch_model ")
             launch = self.launch_model(man=self.arm_name)
             launch_time = time.time()
             time.sleep(10)
-            print("performe_spray ")
             simulation_db = self.performe_spray(db)
-            print("after performe_spray ")
             end_spary = time.time()
             launch.shutdown() # kill proccess
             

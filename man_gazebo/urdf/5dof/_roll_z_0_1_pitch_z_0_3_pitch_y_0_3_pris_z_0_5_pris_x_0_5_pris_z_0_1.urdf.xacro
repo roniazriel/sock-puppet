@@ -45,10 +45,10 @@
             <!-- Inertia parameters -->
         <xacro:property name="link0_mass" value="7" />
         <xacro:property name="link1_mass" value="3.7" />
-        <xacro:property name="link2_mass" value="3.65745" />
-        <xacro:property name="link3_mass" value="3.65745" />
-        <xacro:property name="link4_mass" value="2.19447" />
-        <xacro:property name="link5_mass" value="0.73149" />
+        <xacro:property name="link2_mass" value="2.19447" />
+        <xacro:property name="link3_mass" value="2.19447" />
+        <xacro:property name="link4_mass" value="3.65745" />
+        <xacro:property name="link5_mass" value="3.65745" />
         <xacro:property name="link6_mass" value="0.73149" />
 
         <xacro:property name="link0_radius" value="0.060" /> 
@@ -147,14 +147,14 @@
             <origin xyz="0.0 0.0 ${link1_length / 2}" rpy="0 0 0" />
           </xacro:cylinder_inertial>
         </link>
-<xacro:property name="joint2_type" value="prismatic"/>
-<xacro:property name="joint2_axe" value="0 0 1"/>
-<xacro:property name="link2_length" value="0.5"/>
+<xacro:property name="joint2_type" value="revolute"/>
+<xacro:property name="joint2_axe" value="0 1 0"/>
+<xacro:property name="link2_length" value="0.3"/>
 <!--  joint 2   -->
         <joint name="${prefix}joint2" type="${joint2_type}">
           <parent link="${prefix}link1"/>
           <child link="${prefix}link2" />
-          <origin xyz="0 0 ${link1_length}" rpy="0 0 0 "/>
+          <origin xyz="0 0 ${link1_length + link2_radius}" rpy="${1/2*pi} 0 0 "/>
           <axis xyz="${joint2_axe}"/>
           <xacro:joint_limit joint_type="${joint2_type}" link_length="${link2_length}"/>
           <dynamics damping="0.0" friction="0.0"/>
@@ -177,14 +177,14 @@
             <origin xyz="0.0 0.0 ${link2_length / 2 }" rpy="0 0 0" />
           </xacro:cylinder_inertial>
         </link>
-<xacro:property name="joint3_type" value="prismatic"/>
-<xacro:property name="joint3_axe" value="0 0 1"/>
-<xacro:property name="link3_length" value="0.5"/>
+<xacro:property name="joint3_type" value="revolute"/>
+<xacro:property name="joint3_axe" value="0 1 0"/>
+<xacro:property name="link3_length" value="0.3"/>
 <!--  joint 3   -->
         <joint name="${prefix}joint3" type="${joint3_type}">
           <parent link="${prefix}link2"/>
           <child link="${prefix}link3" />
-          <origin xyz="0 0 ${link2_length + link3_radius}" rpy="${-1/2*pi} 0 0 "/>
+          <origin xyz="0 ${link2_radius+link3_radius} ${link2_length}" rpy="0 0 0 "/>
           <axis xyz="${joint3_axe}"/>
           <xacro:joint_limit joint_type="${joint3_type}" link_length="${link3_length}"/>
           <dynamics damping="0.0" friction="0.0"/>
@@ -207,14 +207,14 @@
             <origin xyz="0.0 0.0 ${link3_length / 2 }" rpy="0 0 0" />
           </xacro:cylinder_inertial>
         </link>
-<xacro:property name="joint4_type" value="revolute"/>
-<xacro:property name="joint4_axe" value="0 1 0"/>
-<xacro:property name="link4_length" value="0.3"/>
+<xacro:property name="joint4_type" value="prismatic"/>
+<xacro:property name="joint4_axe" value="0 0 1"/>
+<xacro:property name="link4_length" value="0.5"/>
 <!--  joint 4   -->
         <joint name="${prefix}joint4" type="${joint4_type}">
           <parent link="${prefix}link3"/>
           <child link="${prefix}link4" />
-          <origin xyz="0 0 ${link3_length + link4_radius}" rpy="${1/2*pi} 0 0 "/>
+          <origin xyz="0 0 ${link3_length}" rpy="0 0 0 "/>
           <axis xyz="${joint4_axe}"/>
           <xacro:joint_limit joint_type="${joint4_type}" link_length="${link4_length}"/>
           <dynamics damping="0.0" friction="0.0"/>
@@ -237,14 +237,14 @@
             <origin xyz="0.0 0.0 ${link4_length / 2 }" rpy="0 0 0" />
           </xacro:cylinder_inertial>
         </link>
-<xacro:property name="joint5_type" value="revolute"/>
-<xacro:property name="joint5_axe" value="0 1 0"/>
-<xacro:property name="link5_length" value="0.1"/>
+<xacro:property name="joint5_type" value="prismatic"/>
+<xacro:property name="joint5_axe" value="0 0 1"/>
+<xacro:property name="link5_length" value="0.5"/>
 <!--  joint 5   -->
         <joint name="${prefix}joint5" type="${joint5_type}">
           <parent link="${prefix}link4"/>
           <child link="${prefix}link5" />
-          <origin xyz=" ${link4_radius+link5_radius} 0 ${link4_length}" rpy="0 0 ${-pi/2} "/>
+          <origin xyz="0 0 ${link4_length + link5_radius}" rpy="0 ${-pi/2} 0 "/>
           <axis xyz="${joint5_axe}"/>
           <xacro:joint_limit joint_type="${joint5_type}" link_length="${link5_length}"/>
           <dynamics damping="0.0" friction="0.0"/>
@@ -267,10 +267,11 @@
             <origin xyz="0.0 0.0 ${link5_length / 2 }" rpy="0 0 0" />
           </xacro:cylinder_inertial>
         </link>
-<xacro:property name="joint6_type" value="revolute"/>
+
+<!--<xacro:property name="joint6_type" value="prismatic"/>
 <xacro:property name="joint6_axe" value="0 0 1"/>
 <xacro:property name="link6_length" value="0.1"/>
-<!--  joint 6   -->
+  joint 6   
         <joint name="${prefix}joint6" type="${joint6_type}">
           <parent link="${prefix}link5"/>
           <child link="${prefix}link6" />
@@ -278,8 +279,8 @@
           <axis xyz="${joint6_axe}"/>
           <xacro:joint_limit joint_type="${joint6_type}" link_length="${link6_length}"/>
           <dynamics damping="0.0" friction="0.0"/>
-        </joint>
-    <!-- link 6   -->
+        </joint>-->
+    <!-- link 6   
         <link name="${prefix}link6">
           <visual>
             <origin xyz="0 0 ${link6_length / 2}" rpy="0 0 0" />
@@ -296,12 +297,13 @@
           <xacro:cylinder_inertial radius="${link6_radius}" length="${link6_length}" mass="${link6_mass}">
             <origin xyz="0.0 0.0 ${link6_length / 2 }" rpy="0 0 0" />
           </xacro:cylinder_inertial>
-        </link>
+        </link> -->
+
         <!-- Sprayer joint - fictive joint -->
         <joint name="fake_joint" type="revolute">
-            <parent link="${prefix}link6" />
+            <parent link="${prefix}link5" />
             <child link = "camera_link" />
-            <origin xyz="0.0  0.0 ${link6_length}" rpy="0.0 0.0 0" />
+            <origin xyz="0.0  0.0 ${link5_length}" rpy="0.0 0.0 0" />
             <axis xyz="0 0 1"/>
             <xacro:joint_limit joint_type="revolute" link_length="0.1"/>
             <dynamics damping="0.0" friction="0.0"/>

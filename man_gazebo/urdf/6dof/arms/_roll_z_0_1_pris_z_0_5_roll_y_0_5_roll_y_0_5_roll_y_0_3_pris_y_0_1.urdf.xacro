@@ -3,9 +3,16 @@
         <xacro:include filename="$(find man_gazebo)/urdf/common.gazebo.xacro" />
         <xacro:include filename="$(find man_gazebo)/urdf/6dof/transmission_6dof.xacro" />
         <xacro:include filename="$(find man_gazebo)/urdf/gazebo.xacro" />
+
+        <link name="world" />
+        
+        <joint name="world_joint" type="fixed">
+            <parent link="world" />
+            <child link = "base_link" />
+            <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
+        </joint>
+
         <xacro:macro name="cylinder_inertial" params="radius length mass *origin">
-
-
         <inertial>
           <mass value="${mass}" />
           <xacro:insert_block name="origin" />
@@ -38,8 +45,8 @@
             <!-- Inertia parameters -->
         <xacro:property name="link0_mass" value="7" />
         <xacro:property name="link1_mass" value="3.7" />
-        <xacro:property name="link2_mass" value="5.12043" />
-        <xacro:property name="link3_mass" value="2.19447" />
+        <xacro:property name="link2_mass" value="3.65745" />
+        <xacro:property name="link3_mass" value="3.65745" />
         <xacro:property name="link4_mass" value="3.65745" />
         <xacro:property name="link5_mass" value="2.19447" />
         <xacro:property name="link6_mass" value="0.73149" />
@@ -51,13 +58,6 @@
         <xacro:property name="link4_radius" value="0.035" />
         <xacro:property name="link5_radius" value="0.030" />
         <xacro:property name="link6_radius" value="0.025" /> 
-
-        <link name="world" />
-          <joint name="world_joint" type="fixed">
-            <parent link="world" />
-            <child link = "base_link" />
-            <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
-          </joint>
 
         <!-- Base Link -->
         <link name="${prefix}base_link" >
@@ -150,7 +150,7 @@
         </link>
 <xacro:property name="joint2_type" value="prismatic"/>
 <xacro:property name="joint2_axe" value="0 0 1"/>
-<xacro:property name="link2_length" value="0.7"/>
+<xacro:property name="link2_length" value="0.5"/>
 <!--  joint 2   -->
         <joint name="${prefix}joint2" type="${joint2_type}">
           <parent link="${prefix}link1"/>
@@ -180,7 +180,7 @@
         </link>
 <xacro:property name="joint3_type" value="revolute"/>
 <xacro:property name="joint3_axe" value="0 0 1"/>
-<xacro:property name="link3_length" value="0.3"/>
+<xacro:property name="link3_length" value="0.5"/>
 <!--  joint 3   -->
         <joint name="${prefix}joint3" type="${joint3_type}">
           <parent link="${prefix}link2"/>
@@ -326,6 +326,14 @@
             <origin xyz="0.0 0.0 0.005" rpy="0 0 0" />
           </xacro:cylinder_inertial>
         </link>
+
+        <!-- ee joint -->
+        <joint name="${prefix}ee_fixed_joint" type="fixed">
+          <parent link="camera_link" />
+          <child link = "${prefix}ee_link" />
+          <origin xyz="0.0  0.0 0.01" rpy="0.0 0.0 0" />
+        </joint>
+
             
         <!-- ee link -->
         <link name="${prefix}ee_link">
@@ -337,12 +345,6 @@
           </collision>
         </link>
 
-            <!-- ee joint -->
-        <joint name="${prefix}ee_fixed_joint" type="fixed">
-          <parent link="camera_link" />
-          <child link = "${prefix}ee_link" />
-          <origin xyz="0.0  0.0 0.01" rpy="0.0 0.0 0" />
-        </joint>
         
             <xacro:arm_transmission prefix="${prefix}" />
             <xacro:arm_gazebo prefix="${prefix}" />
