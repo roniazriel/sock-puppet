@@ -2,6 +2,9 @@
 
 
 FILES=~/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/*
+directory=~/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/
+TOdirectory=~/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/4dof_tested_arms/
+RESULT=~/catkin_ws/src/sock-puppet/results/checkserver.csv
 COUNTER=0
 for FILE in $FILES  
 do 
@@ -10,7 +13,7 @@ do
    extension="${filename##*.}"
    filename="${filename%.*}"
    echo "$filename"
-   python ~/catkin_ws/src/sock-puppet/man_code/scripts/simulator.py $filename $COUNTER
+   python ~/catkin_ws/src/sock-puppet/man_code/scripts/simulator.py $filename $COUNTER $directory $TOdirectory $RESULT
    end=`date +%s`
    runtime=$((end-start))
    echo "Done"

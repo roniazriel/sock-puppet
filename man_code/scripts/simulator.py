@@ -233,6 +233,33 @@ class Simulator(object):
         print("number of arms: ",len(data))
         #print(self.arms, "arms")
 
+    def create_urdf_from_csv_for_server(self, csv_name="all_configs4", folder="arms", num_of_group=None, min_length=1.4): # - create all the urdf for possible robotic models
+        # read from csv file with all the possible configuration for manipulators
+        # num_of_group =  how many links configuration to sample for each joints configurations
+        base_path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/man_gazebo/urdf/"
+        configs = self.read_data(base_path+csv_name)
+        # Create the urdf files
+        data = []
+        self.ros.create_folder(base_path + str(self.dof) + "dof/"+ folder)
+        links = self.set_links_length(min_length = min_length)
+        index = 0
+        for config in configs:
+            for arm in config:
+                if num_of_group is None:
+                    links_configs = links
+                else: 
+                    links_configs = random.sample(links,num_of_group)
+                for link in links_configs:
+                    self.arms.append(self.create_arm(arm["joint"], arm["axe"], link, folder))
+                    path = base_path + str(len(arm["axe"])) + "dof/" + folder + "/"
+                    self.arms[index]["arm"].urdf_write(self.arms[index]["arm"].urdf_data(),
+                                                      path + self.arms[index]["name"])
+                    data.append([self.arms[index]["name"].replace(" ", ""), folder, datetime.now().strftime("%d_%m_%y")])
+                    index = index+1
+        print(data,"data")
+        print("number of arms: ",len(data))
+        #print(self.arms, "arms")
+
     def set_links_length(self, min_length=1.4, max_lenght = 2, link_min=0.1, link_interval=0.2, link_max=0.71):
     # set all the possible links lengths in the defind interval
     # :param min_length: the minimum length of all the links
@@ -459,7 +486,7 @@ class Simulator(object):
             ros.ter_command(command)
 
 
-def one_at_a_time (dof,arm_name,simulation_db,joint_types,links):
+def one_at_a_time (dof,arm_name,simulation_db,joint_types,links,result_file):
     ros = Ros()
     # clean ros log file
     ros.ter_command("rosclean purge -y")
@@ -476,10 +503,10 @@ def one_at_a_time (dof,arm_name,simulation_db,joint_types,links):
     print("simulate")   
     simulation_db = sim.simulate(simulation_db, arm_name=arm_name, joints=joint_types , links=links)
     import os.path
-    if(os.path.isfile('/home/ar1/catkin_ws/src/sock-puppet/results/4dof_valid_results.csv')):
-        pd.DataFrame(simulation_db).to_csv('/home/ar1/catkin_ws/src/sock-puppet/results/4dof_valid_results.csv', mode='a', index= True, header=False)
+    if(os.path.isfile(result_file)):
+        pd.DataFrame(simulation_db).to_csv(result_file, mode='a', index= True, header=False)
     else:
-        pd.DataFrame(simulation_db).to_csv('/home/ar1/catkin_ws/src/sock-puppet/results/4dof_valid_results.csv', index= True)
+        pd.DataFrame(simulation_db).to_csv(result_file, index= True)
     # pd.DataFrame(simulation_db).to_csv(os.environ['HOME'] + "/catkin_ws/src/sock-puppet/" +"results/test_results"+str(file_number)+".csv")          
     # print(simulation_db)
 
@@ -558,14 +585,19 @@ if __name__ == '__main__':
     '''
     simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
                                             "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
-    directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
+    #directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
     dof = 4
 
     print(sys.argv[0])
     print(sys.argv[1])
     arm_name_urdf = sys.argv[1] # var1
     file_number = sys.argv[2] # var2
-    print(file_number, "file_number")
+    directory = sys.argv[3] # var3
+    to_directory = sys.argv[4] # var3
+    result_file = sys.argv[5] # var4
+    print(directory, "directory")
+    print(to_directory, "to_directory")
+    print(result_file, "result_file")
     arm_name = re.sub('\.urdf$', '', arm_name_urdf)
     print("arm name",arm_name)
     #head,arm_name = os.path.split(f[0:-11])
@@ -583,10 +615,10 @@ if __name__ == '__main__':
     # print("joint_axis",joint_axis)
     # print("links",links)
 
-    one_at_a_time(dof,arm_name,simulation_db,joint_types,links)
+    one_at_a_time(dof,arm_name,simulation_db,joint_types,links,result_file)
     print(directory + arm_name_urdf+'.xacro',"first")
     print('/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/tested_arms/' + arm_name_urdf+'.xacro',"second")
-    os.rename(directory + arm_name_urdf+'.xacro', '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/4dof_tested_arms/' + arm_name_urdf+'.xacro')
+    os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
     #os.rename(directory + arm_name_urdf +'.xacro', directory + arm_name_urdf+'.xacro')
 
 
