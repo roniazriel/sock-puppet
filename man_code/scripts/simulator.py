@@ -586,15 +586,15 @@ if __name__ == '__main__':
     simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
                                             "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
     #directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
-    dof = 4
 
     print(sys.argv[0])
     print(sys.argv[1])
     arm_name_urdf = sys.argv[1] # var1
     file_number = sys.argv[2] # var2
     directory = sys.argv[3] # var3
-    to_directory = sys.argv[4] # var3
-    result_file = sys.argv[5] # var4
+    to_directory = sys.argv[4] # var4
+    result_file = sys.argv[5] # var5
+    dof = sys.argv[6] # var6
     print(directory, "directory")
     print(to_directory, "to_directory")
     print(result_file, "result_file")
