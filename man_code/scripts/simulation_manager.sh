@@ -14,7 +14,7 @@ do
    extension="${filename##*.}"
    filename="${filename%.*}"
    echo "$filename"
-   python ~/catkin_ws/src/sock-puppet/man_code/scripts/simulator.py $filename $COUNTER $directory $TOdirectory $RESULT $DOF
+   /usr/bin/python2.7 ~/catkin_ws/src/sock-puppet/man_code/scripts/simulator.py $filename $COUNTER $directory $TOdirectory $RESULT $DOF
    end=`date +%s`
    runtime=$((end-start))
    echo "Done"
