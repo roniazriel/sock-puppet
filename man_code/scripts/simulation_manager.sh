@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /home/ar1/catkin_ws/devel/setup.bash
+source /home/ar1/catkin_ws/devel/setup.bash # added for server experiment
 FILES=~/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/*
 directory=~/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/
 TOdirectory=~/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/4dof_tested_arms/
