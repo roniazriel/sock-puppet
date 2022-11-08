@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+source /home/ar1/catkin_ws/devel/setup.bash
 FILES=~/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/*
 directory=~/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/
 TOdirectory=~/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/4dof_tested_arms/
@@ -14,7 +14,7 @@ do
    extension="${filename##*.}"
    filename="${filename%.*}"
    echo "$filename"
-   /usr/bin/python2.7 ~/catkin_ws/src/sock-puppet/man_code/scripts/simulator.py $filename $COUNTER $directory $TOdirectory $RESULT $DOF
+   python ~/catkin_ws/src/sock-puppet/man_code/scripts/simulator.py $filename $COUNTER $directory $TOdirectory $RESULT $DOF
    end=`date +%s`
    runtime=$((end-start))
    echo "Done"
