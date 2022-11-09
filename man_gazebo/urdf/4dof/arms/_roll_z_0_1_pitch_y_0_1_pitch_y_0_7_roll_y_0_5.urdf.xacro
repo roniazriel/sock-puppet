@@ -290,4 +290,13 @@
             <xacro:arm_gazebo prefix="${prefix}" />
             </xacro:macro>
             <xacro:arm_robot prefix=""/>
-        </robot>  
+        </robot>  0,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,1,1.0204830169677734,False,,,,,,,,
+1,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,2,1.0278589725494385,False,,,,,,,,
+2,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,3,1.037039041519165,False,,,,,,,,
+3,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,4,1.0123040676116943,False,,,,,,,,
+4,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,5,1.0207960605621338,False,,,,,,,,
+5,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,6,1.038992166519165,False,,,,,,,,
+6,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,7,1.0225849151611328,False,,,,,,,,
+7,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,8,1.0190298557281494,False,,,,,,,,
+8,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,9,1.0378131866455078,False,,,,,,,,
+9,_roll_z_0_1_pitch_y_0_1_pitch_x_0_7_roll_y_0_5,10,1.0302340984344482,False,,,,,,,,

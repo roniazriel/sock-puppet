@@ -213,7 +213,7 @@ class Simulator(object):
         configs = self.read_data(base_path+csv_name)
         # Create the urdf files
         data = []
-        self.ros.create_folder(base_path + str(self.dof) + "dof/"+ folder)
+        self.ros.create_folder(base_path + str(self.dof) + "dof/"+ folder) 
         links = self.set_links_length(min_length = min_length)
         index = 0
         for config in configs:
@@ -240,7 +240,7 @@ class Simulator(object):
         configs = self.read_data(base_path+csv_name)
         # Create the urdf files
         data = []
-        self.ros.create_folder(base_path + str(self.dof) + "dof/"+ folder)
+        self.ros.create_folder(base_path + str(self.dof) + "dof/"+ folder) 
         links = self.set_links_length(min_length = min_length)
         index = 0
         for config in configs:
@@ -270,7 +270,7 @@ class Simulator(object):
         links = []
         lengths_2_check = np.arange(link_min, link_max, link_interval).round(2)
         links_length = [[0.1] + list(tup) for tup in
-                        list(product(lengths_2_check, repeat=(self.dof - 1)))]
+                        list(product(lengths_2_check, repeat=(self.dof - 1)))] 
         for link in links_length:
             if sum(link) >= min_length and sum(link) <= max_lenght :
                 links.append([str(x) for x in link])
@@ -587,14 +587,16 @@ if __name__ == '__main__':
                                             "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
     #directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
 
+
     print(sys.argv[0])
-    print(sys.argv[1])
+    #print(sys.argv[1])
     arm_name_urdf = sys.argv[1] # var1
-    file_number = sys.argv[2] # var2
-    directory = sys.argv[3] # var3
-    to_directory = sys.argv[4] # var4
-    result_file = sys.argv[5] # var5
-    dof = sys.argv[6] # var6
+    directory = sys.argv[2] # var3
+    to_directory = sys.argv[3] # var4
+    result_file = sys.argv[4] # var5
+    print(sys.argv[5], "dof")
+    dof = sys.argv[5] # var6
+    file_number = sys.argv[6] # var2
     print(directory, "directory")
     print(to_directory, "to_directory")
     print(result_file, "result_file")
@@ -618,7 +620,7 @@ if __name__ == '__main__':
     one_at_a_time(dof,arm_name,simulation_db,joint_types,links,result_file)
     print(directory + arm_name_urdf+'.xacro',"first")
     print('/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/tested_arms/' + arm_name_urdf+'.xacro',"second")
-    os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
+    # os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
     #os.rename(directory + arm_name_urdf +'.xacro', directory + arm_name_urdf+'.xacro')
 
 
@@ -652,7 +654,7 @@ if __name__ == '__main__':
     ''' Creating the folder that contains all the sampled robotic arms (URDFs)
     '''
     # sim = Simulator(arm_name, dof=4,folder = 'arms',create=False)
-    # sim.create_urdf_from_csv(csv_name="all_configs4",num_of_group=None, folder="arms", min_length=1.4)
+    # sim.create_urdf_from_csv(csv_name="all_configs6",num_of_group=None, folder="arms", min_length=1.4)
 
     ''' Creating 1 URDF
     # '''
@@ -665,4 +667,4 @@ if __name__ == '__main__':
  
     ''' Calculate links lenghts options amount
     ''' 
-    # calc_links_options(min_length=1.4, max_lenght =2,dof=4)
+    # calc_links_options(min_length=1.4, max_lenght =2,dof=5)
