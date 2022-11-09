@@ -6,7 +6,7 @@
 	<arg name="gazebo_pause" default="false" doc="Starts gazebo in paused mode" />
 	<arg name="gazebo_gui" default="true" doc="Starts gazebo gui" />
 	<arg name="world_name" default="worlds/empty.world"/>
-	<arg name="rviz" default="true" doc="Starts rviz gui" />
+	<arg name="rviz" default="false" doc="Starts rviz gui" />
 
 	<!-- launch gazebo -->
 	<include if="$(arg gazebo)" file="$(find man_gazebo)/launch/manipulator.launch">
@@ -22,10 +22,11 @@
 	<include file="$(find man_moveit)/launch/man_moveit_planning_execution.launch">
 		<arg name="dof" value="$(arg dof)" />
 	</include>
-	<!-- show in rviz- just for visulize or to move the manipulator manually -->
 
-  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find man_moveit)/rviz/sock.rviz" /> 
-	 <!-- <include if="$(arg rviz)" file="$(find man_moveit)/launch/sock.rviz"/> -->
+	<!-- show in rviz- just for visulize or to move the manipulator manually -->
+	<!--To open RVIZ gui move first line out of comment-->
+ <!-- <node type="rviz" name="rviz" pkg="rviz" args="-d $(find man_moveit)/rviz/sock.rviz" /> -->
+	<!--   <include if="$(arg rviz)" file="$(find man_moveit)/launch/sock.rviz"/> -->
 
 
 </launch>
