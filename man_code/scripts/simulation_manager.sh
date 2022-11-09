@@ -1,11 +1,15 @@
 #!/bin/bash
 
 
+
 FILES=$1
 directory=$2
 TOdirectory=$3
 RESULT=$4
 DOF=$5
+
+source /home/ar1/catkin_ws/devel/setup.bash # added for server experiment
+
 COUNTER=0
 echo "$FILES"
 echo "$directory"
