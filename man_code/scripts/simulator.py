@@ -619,8 +619,8 @@ if __name__ == '__main__':
 
     one_at_a_time(dof,arm_name,simulation_db,joint_types,links,result_file)
     print(directory + arm_name_urdf+'.xacro',"first")
-    print('/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/tested_arms/' + arm_name_urdf+'.xacro',"second")
-    # os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
+    print(to_directory + arm_name_urdf+'.xacro',"second")
+    os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
     #os.rename(directory + arm_name_urdf +'.xacro', directory + arm_name_urdf+'.xacro')
 
 
