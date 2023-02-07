@@ -118,10 +118,12 @@ class Particle:
         Reachability = ans.loc[(ans['Arm ID'] == arm_name)]['Reachability'].values[0]
         Min_Manipulability = ans.loc[(ans['Arm ID'] == arm_name)]['Min_Manipulability'].values[0]
 
-        if Reachability < 10:
-            objective = 0
-        else:
-            objective = Min_Manipulability
+        # if Reachability < 10:
+        #     objective = 0
+        # else:
+        #     objective = Min_Manipulability
+
+        objective = [Reachability,Min_Manipulability]
 
         if pbest:
             self.pbest_fitness = objective
@@ -251,9 +253,13 @@ def pso(joint_config_indexs,link_config_indexs, generation_num, population_size,
 
     # compute the best particle of swarm and it's fitness
     for i in range(population_size): # check each particle
-        if swarm[i].position_fitness > gbest_fitness:
-          gbest_fitness = swarm[i].position_fitness
-          gbest_position = swarm[i].position
+        if swarm[i].position_fitness[0] > gbest_fitness[0]: # if the robot reached more clusters, its position is better
+              gbest_fitness = swarm[i].position_fitness
+              gbest_position = swarm[i].position
+        elif swarm[i].position_fitness[0] == gbest_fitness[0]:
+            if swarm[i].position_fitness[1] > gbest_fitness[1]:
+                gbest_fitness = swarm[i].position_fitness
+                gbest_position = swarm[i].position
 
     # Particle initialization tracking    
         pso_track = pd.DataFrame(columns=["Iteration_number","ParticleID", "Link_Velocity","Joint_Velocity","Current_Link_Index", 
@@ -287,14 +293,24 @@ def pso(joint_config_indexs,link_config_indexs, generation_num, population_size,
             swarm[k]._fitness_function()
 
           # is new position a new best for the particle?
-            if swarm[k].position_fitness > swarm[k].pbest_fitness:
+            if swarm[k].position_fitness[0] > swarm[k].pbest_fitness[0]:
                 swarm[k].pbest_fitness = swarm[k].position_fitness
                 swarm[k].pbest_position = swarm[k].position
 
+            elif swarm[k].position_fitness[0] == swarm[k].pbest_fitness[0]:
+                if swarm[k].position_fitness[1] > swarm[k].pbest_fitness[1]:
+                    swarm[k].pbest_fitness = swarm[k].position_fitness
+                    swarm[k].pbest_position = swarm[k].position
+
           # is new position a new best overall?
-            if swarm[k].position_fitness > gbest_fitness:
+            if swarm[k].position_fitness[0] > gbest_fitness[0]:
                 gbest_fitness = swarm[k].position_fitness
                 gbest_position = swarm[k].position
+
+            elif swarm[k].position_fitness[0] == gbest_fitness[0]:
+                if swarm[k].position_fitness[1] > gbest_fitness[1]:
+                    gbest_fitness = swarm[k].position_fitness
+                    gbest_position = swarm[k].position
 
         # Keeping track of the particles throughout the algorithm run
             iteration_track = swarm[k].write_track_to_csv(pso_track, Iter)
@@ -316,4 +332,4 @@ if __name__ == '__main__':
 
     track_file = '/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/optimization_track.csv'
     gbest_position, gbest_fitness = pso(joint_config_indexs=joint_config_index,link_config_indexs=link_config_index, generation_num=2, population_size=2, jump_threshold=10, track_file=track_file)
-    print("Final Result:  " + " Best fitness = %.3f" % gbest_fitness + " , Best Arm = " +str(gbest_position.arm_name) + " , Best Joint index = " + str(gbest_position.joint_config_index)+ " , Best Link Index = " + str(gbest_position.link_config_index))
+    print("Final Result:  " + " Best fitness = Reached "+str(gbest_fitness[0])+" Clusters, "+"Min Manipulability: " +str(gbest_fitness[1])+ ", Best Arm = " +str(gbest_position.arm_name) + " , Best Joint index = " + str(gbest_position.joint_config_index)+ " , Best Link Index = " + str(gbest_position.link_config_index))
