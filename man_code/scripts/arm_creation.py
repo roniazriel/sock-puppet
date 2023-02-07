@@ -61,7 +61,8 @@ def create_arm(interface_joints, joint_parent_axis, links, folder="folder"):
                 rpy.append(['0 ', '0 ', '0 '])
     arm = UrdfClass(links, joints, joint_axis, rpy)
     arm.urdf_write(arm.urdf_data(), file_name)
-    return {"arm": arm, "name": file_name, "folder": folder}
+    # print(file_name)
+    return file_name
 
 class UrdfClass(object):
     """ this class create URDF files """
@@ -104,6 +105,23 @@ class UrdfClass(object):
                 fictive_mass = 0
                 link_mass.append(str(fictive_mass))
         return link_mass
+
+    # def calc_weight(self):
+    #     """
+    #     this function calculate the weight of the links according to accumilated weight and length of arm
+    #     :return: weigths- the weight [kg] of each link - list of strings  (from the 2nd link)
+    #     """
+    #     coeffs = [7.3149, 1.1755]  # the coeffs of the linear eauation (found according UR5 and motoman)
+    #     weights = [0]  # the wieght of each link
+    #     acc_length = 0  # accumelated length
+    #     acc_weight = 0  # accumelated weight
+    #     for link in self.links[1:]:
+    #         acc_length = acc_length+float(link)
+    #         link_mass.append(round(acc_length*coeffs[0]+coeffs[1]-acc_weight,2))
+    #         acc_weight = acc_weight + weights[-1]
+    #     while len(weights) < 7:
+    #         weights.append(1)
+    #     return [str(weight) for weight in weights]
 
     def urdf_data(self):
         head = '''<?xml version="1.0"?>
@@ -198,19 +216,19 @@ class UrdfClass(object):
 
         <xacro:property name="joint0_type" value="prismatic" /> 
         <xacro:property name="joint0_axe" value="0 1 0" /> 
-        <xacro:property name="link0_length" value="0.25" />
+        <xacro:property name="link0_length" value="0.1" />
 
         <!--  joint 0   -->
         <joint name="${prefix}joint0" type="${joint0_type}">
           <parent link="${prefix}base_link" />
           <child link = "${prefix}link0" />
-          <origin xyz="0.0 0 ${base_height + link0_radius+0.01}" rpy="0 0.0 0" />
+          <origin xyz="0.0 0 ${base_height}" rpy="0 0.0 0" />
           <axis xyz="${joint0_axe}" />
           <xacro:joint_limit joint_type="${joint0_type}" link_length="${base_length/2}"/>
           <dynamics damping="0.0" friction="0.0"/>
         </joint>
 
-         <!--  link 0  -->
+         <!--  link 0 - The base of the robot  -->
         <link name="${prefix}link0">
           <visual>
             <origin xyz="0 0 ${link0_radius} " rpy="0 0 0" /> 
@@ -384,7 +402,7 @@ class UrdfClass(object):
         <joint name="${prefix}joint1" type="${joint1_type}">
           <parent link="${prefix}link0" />
           <child link="${prefix}link1" />
-          <origin xyz="0.0 0.0 ${link0_length}" rpy="${pi/2} 0.0 0.0" />
+          <origin xyz="0.0 0.0 ${link0_length+0.011}" rpy="0.0 0.0 0.0" />
           <axis xyz="${joint1_axe}"/>
           <xacro:joint_limit joint_type="${joint1_type}" link_length="${link1_length}"/>
           <dynamics damping="0.0" friction="0.0"/>
@@ -433,3 +451,10 @@ class UrdfClass(object):
                 datetime.datetime.now()))  # will print a message to the console
             return '0 0 0'
 
+
+
+
+# joint_types=["roll","pris","roll","roll","pitch"]
+# joint_axis= ['z', 'y','z', 'y', 'y']
+# links =['0.1', '0.3','0.3', '0.1', '0.7']
+# create_arm(joint_types,joint_axis,links)

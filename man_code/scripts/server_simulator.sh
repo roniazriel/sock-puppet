@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dir_size=10391
+dir_size=8203
 dir_name="/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms"
 alias proj="/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms"
 cd /home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms

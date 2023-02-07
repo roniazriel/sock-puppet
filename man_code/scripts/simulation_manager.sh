@@ -2,7 +2,7 @@
 
 
 
-FILES=$1
+FILES=$1 # folder of robotic
 directory=$2
 TOdirectory=$3
 RESULT=$4
@@ -24,6 +24,7 @@ echo "$DOF"
 # RESULT=~/catkin_ws/src/sock-puppet/results/checkserver.csv
 # COUNTER=0
 # DOF=4
+#cd $FILES
 
 for FILE in "$FILES"/*  
 do 

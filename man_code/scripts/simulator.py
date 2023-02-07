@@ -1,4 +1,5 @@
 import os
+import os.path
 import time
 import moveit_msgs.msg
 import geometry_msgs.msg
@@ -211,6 +212,7 @@ class Simulator(object):
         # num_of_group =  how many links configuration to sample for each joints configurations
         base_path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/man_gazebo/urdf/"
         configs = self.read_data(base_path+csv_name)
+        print(configs)
         # Create the urdf files
         data = []
         self.ros.create_folder(base_path + str(self.dof) + "dof/"+ folder) 
@@ -222,6 +224,7 @@ class Simulator(object):
                     links_configs = links
                 else: 
                     links_configs = random.sample(links,num_of_group)
+                    print(links_configs)
                 for link in links_configs:
                     self.arms.append(self.create_arm(arm["joint"], arm["axe"], link, folder))
                     path = base_path + str(len(arm["axe"])) + "dof/" + folder + "/"
@@ -233,15 +236,29 @@ class Simulator(object):
         print("number of arms: ",len(data))
         #print(self.arms, "arms")
 
-    def create_urdf_from_csv_for_server(self, csv_name="all_configs4", folder="arms", num_of_group=None, min_length=1.4): # - create all the urdf for possible robotic models
+    def create_urdf_from_csv_families(self, csv_name="all_configs4", folder="arms", num_of_group=None, min_length=1.4): # - create all the urdf for possible robotic models
         # read from csv file with all the possible configuration for manipulators
         # num_of_group =  how many links configuration to sample for each joints configurations
         base_path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/man_gazebo/urdf/"
         configs = self.read_data(base_path+csv_name)
+        print(configs)
         # Create the urdf files
         data = []
-        self.ros.create_folder(base_path + str(self.dof) + "dof/"+ folder) 
-        links = self.set_links_length(min_length = min_length)
+        self.ros.create_folder(base_path + str(self.dof) + "dof/"+ folder)
+        temp = pd.read_csv('10_link_configurations.csv')
+        temp = temp.drop(columns='Unnamed: 0')
+
+        l = temp.values.tolist()
+
+        links = []
+        for x in l:
+            ls = []
+            for y in x:
+                ls.append(str(y))
+            links.append(ls)
+
+        print(l)
+        print(links)
         index = 0
         for config in configs:
             for arm in config:
@@ -249,6 +266,7 @@ class Simulator(object):
                     links_configs = links
                 else: 
                     links_configs = random.sample(links,num_of_group)
+                    print(links_configs)
                 for link in links_configs:
                     self.arms.append(self.create_arm(arm["joint"], arm["axe"], link, folder))
                     path = base_path + str(len(arm["axe"])) + "dof/" + folder + "/"
@@ -259,6 +277,37 @@ class Simulator(object):
         print(data,"data")
         print("number of arms: ",len(data))
         #print(self.arms, "arms")
+
+    def create_urdf_from_csv_check(self, csv_name="all_configs4", folder="arms", num_of_group=None, min_length=1.4): # - create all the urdf for possible robotic models
+        # read from csv file with all the possible configuration for manipulators
+        # num_of_group =  how many links configuration to sample for each joints configurations
+        base_path = os.environ['HOME'] + "/catkin_ws/src/sock-puppet/man_gazebo/urdf/"
+        configs = self.read_data(base_path+csv_name)
+        print(len(configs), "len conf")
+        print(configs)
+        # Create the urdf files
+        data = []
+        # self.ros.create_folder(base_path + str(self.dof) + "dof/"+ folder) 
+        links = self.set_links_length(min_length = min_length)
+        print(len(links),"len links")
+        # index = 0
+        # for config in configs:
+        #     for arm in config:
+        #         if num_of_group is None:
+        #             links_configs = links
+        #         else: 
+        #             links_configs = random.sample(links,num_of_group)
+        #             print(links_configs)
+        #         for link in links_configs:
+        #             self.arms.append(self.create_arm(arm["joint"], arm["axe"], link, folder))
+        #             path = base_path + str(len(arm["axe"])) + "dof/" + folder + "/"
+        #             self.arms[index]["arm"].urdf_write(self.arms[index]["arm"].urdf_data(),
+        #                                               path + self.arms[index]["name"])
+        #             data.append([self.arms[index]["name"].replace(" ", ""), folder, datetime.now().strftime("%d_%m_%y")])
+        #             index = index+1
+        # # print(data,"data")
+        # print("number of arms: ",len(data))
+        return configs
 
     def set_links_length(self, min_length=1.4, max_lenght = 2, link_min=0.1, link_interval=0.2, link_max=0.71):
     # set all the possible links lengths in the defind interval
@@ -441,6 +490,11 @@ class Simulator(object):
                     theta_mean.append(0)
                     to_norm.append(2*np.pi)
                 else:
+                    print(theta_mean)
+                    print(link_length)
+                    print(joints.index(joint))
+                    print(link_length[joints.index(joint)])
+                    print(float(link_length[joints.index(joint)])/2)
                     theta_mean.append(float(link_length[joints.index(joint)])/2)
                     to_norm.append(float(link_length[joints.index(joint)]))
             dis = (cur_pos[:-1]-theta_mean)
@@ -502,11 +556,11 @@ def one_at_a_time (dof,arm_name,simulation_db,joint_types,links,result_file):
 
     print("simulate")   
     simulation_db = sim.simulate(simulation_db, arm_name=arm_name, joints=joint_types , links=links)
-    import os.path
+    
     if(os.path.isfile(result_file)):
-        pd.DataFrame(simulation_db).to_csv(result_file, mode='a', index= True, header=False)
+        pd.DataFrame(simulation_db).to_csv(result_file, mode='a', index=False, header=False)
     else:
-        pd.DataFrame(simulation_db).to_csv(result_file, index= True)
+        pd.DataFrame(simulation_db).to_csv(result_file, index=False)
     # pd.DataFrame(simulation_db).to_csv(os.environ['HOME'] + "/catkin_ws/src/sock-puppet/" +"results/test_results"+str(file_number)+".csv")          
     # print(simulation_db)
 
@@ -575,52 +629,89 @@ def calc_links_options(min_length=1.4, max_lenght = 2, link_min=0.1, link_interv
     links = set_links_options(min_length, max_lenght, link_min, link_interval, link_max, dof)
     print(type(links))
     print("Links Lenghts options amount: ",len(links))
+    # print(links)
+    # df = pd.DataFrame(links, columns = ['Link1_Length','Link2_Length','Link3_Length','Link4_Length','Link5_Length','Link6_Length'])
+    # df["Index"]= [i+1 for i in range(456)]
+
+    # df.to_csv("Link_Configuration_Indexs.csv")
 
 
 
 if __name__ == '__main__':
+
+    joint_config_index = pd.read_csv("Sorted_Joint_Configs_Indexs.csv")
+    link_config_index = pd.read_csv("Sorted_Link_Configs_Indexs.csv")
+
+
+    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
+                                            "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
+
+    result_file='/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/optimization_results_tests.csv'
+    
+    joint_index = sys.argv[1] # var1
+    link_index = sys.argv[2] # var3
+    arm_name = sys.argv[3] # var4
+
+    # Get new particle info
+    joints = joint_config_index.loc[joint_config_index["Index"]== int(joint_index)]
+    links = link_config_index.loc[link_config_index["Index"]==int(link_index)]
+
+
+    joint_types=[joints['Joint'+str(i+1)+'_Type'].values[0] for i in range(6)]
+    joint_axis=[joints['Joint'+str(i+1)+'_Axis'].values[0] for i in range(6)]
+    links_lengths = [str(links['Link'+str(i+1)+'_Length'].values[0]) for i in range(6)]
+
+    # print("Joints types: ", joint_types)
+    # print("Joints axis: ", joint_axis)
+    # print("Links lengths: ", links_lengths)
+
+    # Create URDF - the particle
+    # arm_name = create_arm(joint_types,joint_axis,links_lengths)
+
+
+    one_at_a_time(6,arm_name,simulation_db,joint_types,links_lengths,result_file)
+
     ''' Runing simulation- Go through all URDF files in 6dof/arms folder
         all simulations data is saved in sim_results file
         all URDFs has to be saved in a configuration name format
     '''
-    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
-                                            "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
-    #directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
+    # simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
+    #                                         "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
+    # #directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
 
 
-    print(sys.argv[0])
-    #print(sys.argv[1])
-    arm_name_urdf = sys.argv[1] # var1
-    directory = sys.argv[2] # var3
-    to_directory = sys.argv[3] # var4
-    result_file = sys.argv[4] # var5
-    print(sys.argv[5], "dof")
-    dof = sys.argv[5] # var6
-    file_number = sys.argv[6] # var2
-    print(directory, "directory")
-    print(to_directory, "to_directory")
-    print(result_file, "result_file")
-    arm_name = re.sub('\.urdf$', '', arm_name_urdf)
-    print("arm name",arm_name)
-    #head,arm_name = os.path.split(f[0:-11])
-    configuration = arm_name.split("_")
-    configuration = configuration[1:]
+    # print(sys.argv[0])
+    # #print(sys.argv[1])
+    # arm_name_urdf = sys.argv[1] # var1
+    # directory = sys.argv[2] # var3
+    # to_directory = sys.argv[3] # var4
+    # result_file = sys.argv[4] # var5
+    # print(sys.argv[5], "dof")
+    # dof = sys.argv[5] # var6
+    # file_number = sys.argv[6] # var2
+    # print(directory, "directory")
+    # print(to_directory, "to_directory")
+    # print(result_file, "result_file")
+    # arm_name = re.sub('\.urdf$', '', arm_name_urdf)
+    # print("arm name",arm_name)
+    # #head,arm_name = os.path.split(f[0:-11])
+    # configuration = arm_name.split("_")
+    # configuration = configuration[1:]
 
-    joint_types=[]
-    joint_axis=[]
-    links=[]
-    for i in range(0,len(configuration)-3,4):
-        joint_types.append(configuration[i])
-        joint_axis.append(configuration[i+1])
-        links.append(configuration[i+2]+"."+configuration[i+3])
-    # print("joint_types",joint_types)
-    # print("joint_axis",joint_axis)
-    # print("links",links)
+    # joint_types=[]
+    # joint_axis=[]
+    # links=[]
+    # for i in range(0,len(configuration)-3,4):
+    #     joint_types.append(configuration[i])
+    #     joint_axis.append(configuration[i+1])
+    #     links.append(configuration[i+2]+"."+configuration[i+3])
+    # # print("joint_types",joint_types)
+    # # print("joint_axis",joint_axis)
+    # # print("links",links)
 
-    one_at_a_time(dof,arm_name,simulation_db,joint_types,links,result_file)
-    print(directory + arm_name_urdf+'.xacro',"first")
-    print(to_directory + arm_name_urdf+'.xacro',"second")
-    os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
+    # one_at_a_time(dof,arm_name,simulation_db,joint_types,links,result_file)
+    # print(directory + arm_name_urdf+'.xacro',"first")
+    # os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
     #os.rename(directory + arm_name_urdf +'.xacro', directory + arm_name_urdf+'.xacro')
 
 
@@ -653,18 +744,23 @@ if __name__ == '__main__':
 
     ''' Creating the folder that contains all the sampled robotic arms (URDFs)
     '''
-    # sim = Simulator(arm_name, dof=4,folder = 'arms',create=False)
-    # sim.create_urdf_from_csv(csv_name="all_configs6",num_of_group=None, folder="arms", min_length=1.4)
+    # sim = Simulator(arm_name, dof=6,folder = 'arms',create=False)
+    # # sim.create_urdf_from_csv(csv_name="all_config5",num_of_group=None, folder="arms", min_length=1.4)
+
+    # sim.create_urdf_from_csv_families(csv_name="all_configs6",num_of_group=None, folder="arms", min_length=1.4)
+    # os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
 
     ''' Creating 1 URDF
     # '''
-    # joint_types=["roll","pris","roll","roll","roll", "pris"]
-    # joint_axis= ['z', 'z','y', 'y', 'y','y']
-    # links =['0.1', '0.5','0.5', '0.5', '0.3','0.1']
+    # joint_types=["roll","pris","roll","roll","pitch"]
+    # joint_axis= ['z', 'y','z', 'y', 'y']
+    # links =['0.1', '0.3','0.3', '0.1', '0.7']
     # arm_name=None
     # sim = simulation(joint_types, joint_axis, links ,arm_name)  
     # sim.generate_urdf()
  
     ''' Calculate links lenghts options amount
     ''' 
-    # calc_links_options(min_length=1.4, max_lenght =2,dof=5)
+    # calc_links_options(min_length=1.4, max_lenght =2,dof=6)
+
+#_roll_z_0_1_pitch_y_0_1_pitch_z_0_1_pitch_x_0_1_pitch_x_0_5_roll_y_0_5
