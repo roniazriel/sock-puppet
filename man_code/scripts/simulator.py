@@ -483,22 +483,17 @@ class Simulator(object):
 
     def mid_joint_proximity(self,cur_pos, joints, link_length):
         try:
-            theta_mean = [0.75]
-            to_norm = [1.5]
+            theta_mean = [0.75] # first joint is prismatic- mean is 5.5
+            to_norm = [1.5] # lenght is 11
             for joint in joints:
                 if "pris" not in joint:
-                    theta_mean.append(0)
-                    to_norm.append(2*np.pi)
+                    theta_mean.append(0) # for revolute joints the center is in zero (limit is [-pi, pi])
+                    to_norm.append(2*np.pi) # to normalize by total of 2*pi
                 else:
-                    print(theta_mean)
-                    print(link_length)
-                    print(joints.index(joint))
-                    print(link_length[joints.index(joint)])
-                    print(float(link_length[joints.index(joint)])/2)
-                    theta_mean.append(float(link_length[joints.index(joint)])/2)
-                    to_norm.append(float(link_length[joints.index(joint)]))
+                    theta_mean.append(float(link_length[joints.index(joint)])/2) # for prismatic joints, the center is half of the link lenght (limit is [lenght, 0])
+                    to_norm.append(float(link_length[joints.index(joint)])) # to normalize by link lenght
             dis = (cur_pos[:-1]-theta_mean)
-            nor_dis = np.asarray(np.abs(dis))/np.asarray(to_norm)
+            nor_dis = np.asarray(np.abs(dis))/np.asarray(to_norm) # abs since direction doesnt matter, normalize distances
             w = np.identity(len(joints)+1)*nor_dis  # weighted diagonal matrix
             print(w,"w")
             print(nor_dis,"nor_dis")
@@ -639,18 +634,19 @@ def calc_links_options(min_length=1.4, max_lenght = 2, link_min=0.1, link_interv
 
 if __name__ == '__main__':
 
-    joint_config_index = pd.read_csv("Sorted_Joint_Configs_Indexs.csv")
-    link_config_index = pd.read_csv("Sorted_Link_Configs_Indexs.csv")
+    joint_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Joint_Configs_Indexs.csv")
+    link_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Link_Configs_Indexs.csv")
 
 
     simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
                                             "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
 
-    result_file='/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/optimization_results_tests.csv'
+    # result_file='/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/optimization_results_tests2.csv'
     
     joint_index = sys.argv[1] # var1
     link_index = sys.argv[2] # var3
     arm_name = sys.argv[3] # var4
+    result_file = sys.argv[4]
 
     # Get new particle info
     joints = joint_config_index.loc[joint_config_index["Index"]== int(joint_index)]

@@ -454,7 +454,9 @@ class UrdfClass(object):
 
 
 
-# joint_types=["roll","pris","roll","roll","pitch"]
-# joint_axis= ['z', 'y','z', 'y', 'y']
-# links =['0.1', '0.3','0.3', '0.1', '0.7']
-# create_arm(joint_types,joint_axis,links)
+joint_types=["roll","roll","roll","pris","pitch","pitch"]
+joint_axis= ['z', 'y','y', 'z','y', 'x']
+links =['0.1', '0.1','0.5', '0.7', '0.1','0.1']
+create_arm(joint_types,joint_axis,links)
+
+#_roll_z_0_1_pitch_y_0_1_roll_y_0_7_pris_z_0_1_pitch_y_0_3_pris_z_0_1
