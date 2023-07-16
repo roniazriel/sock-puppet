@@ -454,9 +454,31 @@ class UrdfClass(object):
 
 
 
-joint_types=["roll","roll","roll","pris","pitch","pitch"]
-joint_axis= ['z', 'y','y', 'z','y', 'x']
-links =['0.1', '0.1','0.5', '0.7', '0.1','0.1']
+joint_types=['roll', 'pris', 'pitch', 'roll', 'pris', 'pitch']
+joint_axis= ['z', 'y', 'x', 'x', 'y', 'y']
+links =['0.1', '0.3', '0.5', '0.1', '0.7', '0.3']
 create_arm(joint_types,joint_axis,links)
 
-#_roll_z_0_1_pitch_y_0_1_roll_y_0_7_pris_z_0_1_pitch_y_0_3_pris_z_0_1
+#pso
+# ['roll', 'pris', 'pitch', 'pitch', 'roll', 'pris']  ['z', 'y', 'z', 'y', 'x', 'y']  ['0.1', '0.5', '0.3', '0.1', '0.3', '0.1']
+# ['roll', 'pitch', 'pris', 'pitch', 'roll', 'roll']  ['z', 'y', 'z', 'y', 'z', 'y']  ['0.1', '0.1', '0.7', '0.3', '0.5', '0.3']
+# ['roll', 'roll', 'roll', 'pris', 'pitch', 'roll']   ['z', 'y', 'y', 'z', 'y', 'x']  ['0.1', '0.3', '0.5', '0.7', '0.3', '0.1']
+# ['roll', 'roll', 'roll', 'pris', 'roll', 'roll']    ['z', 'y', 'y', 'y', 'y', 'y']  ['0.1', '0.3', '0.5', '0.7', '0.1', '0.1']
+# ['roll', 'pris', 'pitch', 'pitch', 'roll', 'pris']  ['z', 'y', 'x', 'y', 'x', 'y']  ['0.1', '0.7', '0.3', '0.3', '0.1', '0.5']
+# ['roll', 'pitch', 'pitch', 'pris', 'pitch', 'roll'] ['z', 'y', 'x', 'z', 'y', 'x']  ['0.1', '0.3', '0.5', '0.7', '0.3', '0.1']
+# ['roll', 'pris', 'pitch', 'roll', 'pitch', 'roll']  ['z', 'y', 'x', 'z', 'y', 'x']  ['0.1', '0.5', '0.5', '0.7', '0.1', '0.1']
+# ['roll', 'pris', 'pris', 'roll', 'pitch', 'pitch']  ['z', 'y', 'y', 'x', 'y', 'y']  ['0.1', '0.3', '0.1', '0.7', '0.7', '0.1']
+# ['roll', 'pitch', 'roll', 'pris', 'pitch', 'pitch'] ['z', 'y', 'x', 'z', 'y', 'z']  ['0.1', '0.1', '0.5', '0.7', '0.1', '0.1']
+# ['roll', 'pitch', 'pitch', 'pris', 'pitch', 'roll'] ['z', 'y', 'x', 'z', 'y', 'x']  ['0.1', '0.3', '0.7', '0.3', '0.1', '0.1']
+
+#pso+xgboost
+# ['roll', 'pris', 'pitch', 'pris', 'pitch', 'pitch'] ['z', 'y', 'z', 'x', 'y', 'z']  ['0.1', '0.5', '0.1', '0.7', '0.3', '0.1']
+# ['roll', 'pitch', 'pris', 'pris', 'roll', 'pitch']  ['z', 'y', 'y', 'x', 'z', 'y']  ['0.1', '0.1', '0.5', '0.5', '0.7', '0.1']
+# ['roll', 'pris', 'pitch', 'pitch', 'pitch', 'pitch']    ['z', 'y', 'x', 'z', 'z', 'x']  ['0.1', '0.3', '0.7', '0.1', '0.7', '0.1']
+# ['roll', 'roll', 'roll', 'pris', 'pitch', 'roll']   ['z', 'y', 'y', 'z', 'y', 'x']  ['0.1', '0.3', '0.5', '0.7', '0.1', '0.1']
+# ['roll', 'roll', 'pitch', 'pris', 'pitch', 'roll']  ['z', 'y', 'y', 'z', 'y', 'z']  ['0.1', '0.7', '0.7', '0.1', '0.1', '0.3']
+# ['roll', 'pitch', 'pitch', 'pris', 'roll', 'roll']  ['z', 'y', 'x', 'z', 'y', 'y']  ['0.1', '0.3', '0.7', '0.5', '0.1', '0.1']
+# ['roll', 'roll', 'pitch', 'pris', 'roll', 'roll']   ['z', 'y', 'y', 'z', 'y', 'y']  ['0.1', '0.7', '0.1', '0.7', '0.1', '0.1']
+# ['roll', 'pitch', 'roll', 'pris', 'pitch', 'pitch'] ['z', 'y', 'z', 'z', 'y', 'x']  ['0.1', '0.1', '0.5', '0.7', '0.1', '0.1']
+# ['roll', 'pitch', 'pitch', 'pris', 'pitch', 'pris'] ['z', 'y', 'z', 'x', 'y', 'x']  ['0.1', '0.3', '0.1', '0.7', '0.3', '0.5']
+# ['roll', 'pris', 'pitch', 'roll', 'pris', 'pitch']  ['z', 'y', 'x', 'x', 'y', 'y']  ['0.1', '0.3', '0.5', '0.1', '0.7', '0.3']

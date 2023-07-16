@@ -12,6 +12,8 @@ from numpy import mean
 from ros import Ros, MoveGroupPythonInterface, UrdfClass
 from simulator import Simulator, one_at_a_time
 from arm_creation import create_arm, UrdfClass
+import csv
+from datetime import datetime
 
 """ This is the framwork of the optimization process -  PSO implementation
     
@@ -42,7 +44,7 @@ class RoboticPosition:
 
 
 class Particle:
-    def __init__(self,Pid, joint_config_indexs,link_config_indexs,seed):
+    def __init__(self,Pid, joint_config_indexs,link_config_indexs,seed,sim_res_file):
         ''' Create Particle
             Pid: particle id
             :param joint_config_index: joint configuration index
@@ -65,13 +67,13 @@ class Particle:
         # initialize joint config velocity of the particle with 0.0 value
         self.max_joint_config_velocity = 6836 # max velocity = max x
         random.seed(self.seed)
-        self.joint_config_velocity = np.random.RandomState(self.seed).randint(2,10)
+        self.joint_config_velocity = random.randint(2,10)
         print("initiate joint vel",self.joint_config_velocity)
 
         # initialize link config velocity of the particle with 0.0 value
         self.max_link_config_velocity = 456 # max velocity = max x
-        random.seed(self.seed)
-        self.link_config_velocity = np.random.RandomState(self.seed).randint(2,10)
+        random.seed(self.seed*2)
+        self.link_config_velocity = random.randint(2,10)
         print("initiate link vel",self.link_config_velocity)
 
         # initialize an indicator for switching between joint configurations 
@@ -79,7 +81,7 @@ class Particle:
 
         # initialize position of the particle with randomly
         self._update_position(initiate=True) # initialize also best particle position to initial position
-        self.init_threshold = self._fitness_function(pbest=True) # initialize also best particle fitness of the particle
+        self.init_threshold, self.init_total_predicted = self._fitness_function(pbest=True,result_file=sim_res_file) # initialize also best particle fitness of the particle
 
         # initialize best particle position to initial position
         # self._update_position(initiate=True,pbest=True)
@@ -98,14 +100,14 @@ class Particle:
             joint_types = self.pbest_position.joint_types
             joint_axis = self.pbest_position.joint_axis
             links = self.pbest_position.links
-            args = [str(self.pbest_position.joint_config_index), str(self.pbest_position.link_config_index),arm_name]
+            args = [str(self.pbest_position.joint_config_index), str(self.pbest_position.link_config_index),arm_name,result_file]
         else:
             
             arm_name = self.position.arm_name
             joint_types = self.position.joint_types
             joint_axis = self.position.joint_axis
             links = self.position.links
-            args = [str(self.position.joint_config_index), str(self.position.link_config_index),arm_name]
+            args = [str(self.position.joint_config_index), str(self.position.link_config_index),arm_name,result_file]
 
         result_file = result_file
         simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
@@ -156,7 +158,7 @@ class Particle:
         else:
             self.position_fitness = objective
 
-        return threshold
+        return threshold,total_predicted
 
 
     def _update_velocity(self, gbest_position,w,jump_threshold):
@@ -165,7 +167,9 @@ class Particle:
         gbest: [global best Joint configuration, global best Link configuration]
         """
         # Randomly generate r1, r2 and inertia weight from normal distribution
+        random.seed(self.seed)
         r1 = random.random()
+        random.seed(self.seed+1)
         r2 = random.random()
 
         
@@ -307,8 +311,9 @@ class Particle:
     def _update_position(self, initiate, jump_threshold=5,pbest=False):
 
         if initiate:
-            joint_index = np.random.RandomState(self.seed).randint(1,6836)
-            link_index = np.random.RandomState(self.seed).randint(1,456)
+            random.seed(self.seed)
+            joint_index = random.randint(1,6836)
+            link_index = random.randint(1,456)
             print("joint_index",joint_index)
             print("link_index",link_index)
         else:
@@ -364,9 +369,10 @@ class Particle:
             self.position = pos
 
 
-    def write_track_to_csv(self,db,i,gbest_position,gbest_fitness,threshold="Initialization"):
+    def write_track_to_csv(self,db,i,gbest_position,gbest_fitness,total_predicted,threshold="Initialization"):
         db = db.append({"Iteration_number": i,
             "ParticleID": self.id,
+            "Particle_seed":self.seed,
             "Link_Velocity": self.link_config_velocity,
             "Joint_Velocity":self.joint_config_velocity,
             "Current_Link_Index": self.position.link_config_index, 
@@ -376,6 +382,7 @@ class Particle:
             "Current_Links_Lengths": self.position.links,
             "Current_Fitness":self.position_fitness,
             "XGBOOST_threshold": threshold,
+            "XGBOOST_total_predicted": total_predicted,
             "pbest_Link_Index": self.pbest_position.link_config_index, 
             "pbest_Joint_Index": self.pbest_position.joint_config_index,
             "pbest_Joints_Types": self.pbest_position.joint_types,
@@ -412,10 +419,10 @@ def show_particles(swarm,iter_num , show, colors,fig_title):
     else:
         plt.savefig(fig_title+"IterationPlot_"+str(iter_num)+".png")
 
-def pso(joint_config_indexs,link_config_indexs, generation_num, population_size, w_type,jump_threshold, track_file):
+def pso(joint_config_indexs,link_config_indexs, generation_num, population_size, w_type,jump_threshold, track_file,sim_res_file, seeds):
         
     # create n random particles
-    swarm = [Particle(i,joint_config_indexs,link_config_indexs, i) for i in range(population_size)]
+    swarm = [Particle(i,joint_config_indexs,link_config_indexs, seeds[i], sim_res_file) for i in range(population_size)]
  
     # initiate swarm's best_position and best_fitness
     gbest_position = swarm[0].position
@@ -432,24 +439,28 @@ def pso(joint_config_indexs,link_config_indexs, generation_num, population_size,
                 gbest_position = swarm[i].position
 
     # Particle initialization tracking    
-        pso_track = pd.DataFrame(columns=["Iteration_number","ParticleID", "Link_Velocity","Joint_Velocity","Current_Link_Index", 
-        "Current_Joint_Index", "Current_Joints_Types","Current_Joints_Axis","Current_Links_Lengths","Current_Fitness","XGBOOST_threshold","pbest_Link_Index", 
-        "pbest_Joint_Index", "pbest_Joints_Types","pbest_Joints_Axis","pbest_Links_Lengths","pbest_Fitness"])
+        pso_track = pd.DataFrame(columns=["Iteration_number","ParticleID", "Particle_seed","Link_Velocity","Joint_Velocity","Current_Link_Index", 
+        "Current_Joint_Index", "Current_Joints_Types","Current_Joints_Axis","Current_Links_Lengths","Current_Fitness","XGBOOST_threshold","XGBOOST_total_predicted","pbest_Link_Index", 
+        "pbest_Joint_Index", "pbest_Joints_Types","pbest_Joints_Axis","pbest_Links_Lengths","pbest_Fitness","gbest_Link_Index", "gbest_Joint_Index",
+        "gbest_Joints_Types","gbest_Joints_Axis","gbest_Links_Lengths","gbest_Fitness"])
+        pd.DataFrame(pso_track).to_csv(track_file, mode='a', index=False)
 
-        initialization_track = swarm[i].write_track_to_csv(pso_track, "Initialization",gbest_position=gbest_position,gbest_fitness=gbest_fitness,threshold=swarm[i].init_threshold)
+        initialization_track = swarm[i].write_track_to_csv(pso_track, "Initialization",gbest_position=gbest_position,gbest_fitness=gbest_fitness,total_predicted=swarm[i].init_total_predicted,
+            threshold=swarm[i].init_threshold)
 
         if(os.path.isfile(track_file)):
             pd.DataFrame(initialization_track).to_csv(track_file, mode='a', index=False, header=False)
         else:
-            pd.DataFrame(initialization_track).to_csv(track_file, index=False)
+            pd.DataFrame(initialization_track).to_csv(track_file, index=False,header=False)
 
     colors = np.random.random(len(swarm))
-    show_particles(swarm,0,False,colors,"")
+    # show_particles(swarm,0,False,colors,"")
 
     # main loop of pso
     Iter = 0
 
     # generate random chaotic number
+    random.seed(456)
     zk = random.random()
     # initialization rules
     if ((zk==0.0) or (zk==0.25) or (zk==0.5) or (zk == 0.75) or (zk==1.0)) :
@@ -479,7 +490,7 @@ def pso(joint_config_indexs,link_config_indexs, generation_num, population_size,
             swarm[k]._update_position(initiate=False,jump_threshold=jump_threshold)
 
           # compute fitness of new position
-            threshold = swarm[k]._fitness_function()
+            threshold,total_predicted = swarm[k]._fitness_function()
 
           # is new position a new best for the particle?
             if swarm[k].position_fitness[0] > swarm[k].pbest_fitness[0]:
@@ -503,7 +514,7 @@ def pso(joint_config_indexs,link_config_indexs, generation_num, population_size,
 
         # Keeping track of the particles throughout the algorithm run
 
-            iteration_track = swarm[k].write_track_to_csv(pso_track, Iter,gbest_position=gbest_position,gbest_fitness=gbest_fitness, threshold=threshold)
+            iteration_track = swarm[k].write_track_to_csv(pso_track, Iter,gbest_position=gbest_position,gbest_fitness=gbest_fitness, total_predicted=total_predicted,threshold=threshold)
             print(iteration_track)
             if(os.path.isfile(track_file)):
                 pd.DataFrame(iteration_track).to_csv(track_file, mode='a', index=False, header=False)
@@ -521,7 +532,25 @@ if __name__ == '__main__':
     joint_config_index = pd.read_csv("Sorted_Joint_Configs_Indexs.csv")
     link_config_index = pd.read_csv("Sorted_Link_Configs_Indexs.csv")
 
-    # population_size = 20 # common selection is between 20-50
-    track_file = '/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/optimization_ml_track.csv'
-    gbest_position, gbest_fitness = pso(joint_config_indexs=joint_config_index,link_config_indexs=link_config_index, generation_num=200, population_size=50,w_type='CLDIW', jump_threshold=10, track_file=track_file)
-    print("Final Result:  " + " Best fitness = Reached "+str(gbest_fitness[0])+" Clusters, "+"Min Manipulability: " +str(gbest_fitness[1])+ ", Best Arm = " +str(gbest_position.arm_name) + " , Best Joint index = " + str(gbest_position.joint_config_index)+ " , Best Link Index = " + str(gbest_position.link_config_index))
+    for i in range(2,10):
+        track_file = '/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/finalexperimentXG_track'+str(i)+'.csv'
+        sim_res_file = '/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/simXG_res_file'+str(i)+'.csv'
+        print(track_file)
+        start_time = datetime.now()
+        with open(track_file,"w") as f:
+            cr = csv.writer(f,delimiter=";",lineterminator="\n")
+            cr.writerow([start_time])
+
+        population_size = 50
+        seeds = [(j+1) for j in range(i*population_size,(i*population_size)+population_size)]
+        print(seeds)
+        print(seeds[0])
+        print(seeds[1])
+        gbest_position, gbest_fitness = pso(joint_config_indexs=joint_config_index,link_config_indexs=link_config_index, generation_num=200, population_size=population_size,w_type='CLDIW', jump_threshold=10, track_file=track_file, sim_res_file=sim_res_file, seeds=seeds)
+        print("Final Result:  " + " Best fitness = Reached "+str(gbest_fitness[0])+" Clusters, "+"Min Manipulability: " +str(gbest_fitness[1])+ ", Best Arm = " +str(gbest_position.arm_name) + " , Best Joint index = " + str(gbest_position.joint_config_index)+ " , Best Link Index = " + str(gbest_position.link_config_index))
+        
+        end_time = datetime.now()
+        with open(track_file,"a") as f:
+            cr = csv.writer(f,delimiter=";",lineterminator="\n")
+            cr.writerow([end_time])
+

@@ -25,8 +25,8 @@
 
 	<!-- show in rviz- just for visulize or to move the manipulator manually -->
 	<!--To open RVIZ gui move first line out of comment-->
- <!-- <node type="rviz" name="rviz" pkg="rviz" args="-d $(find man_moveit)/rviz/sock.rviz" /> -->
-	<!--   <include if="$(arg rviz)" file="$(find man_moveit)/launch/sock.rviz"/> -->
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find man_moveit)/rviz/sock.rviz" /> 
+	 <include if="$(arg rviz)" file="$(find man_moveit)/launch/sock.rviz"/> 
 
 
 </launch>

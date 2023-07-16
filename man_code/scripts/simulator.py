@@ -64,46 +64,28 @@ class Simulator(object):
             #     self.arms = arms
 
         # desired positions of the EE in world frame
-        # grapes_cords=  [[1.1,2.9,1.35],
-        #                 [1.3,2.08,1.57],
-        #                 [0.7,1.42,1.8],
-        #                 [1.2,0.08,1.2],
 
-        #                 [0.7,-0.15,1.2],
-        #                 [1.15,-1.53,1.47],
-        #                 [1.2,-1.42,1.6],
-        #                 [1.3,-2.15,1.8],
-        #                 [0.95,-3.2,1.68],
-        #                 [1.3,-4,1.2]]
 
-        # grapes_cords=  [[1.1,0,1.35],
-        #                 [1.3,0,1.57],
-        #                 [0.7,0,1.8],
-        #                 [1.2,0,1.2],
+        # grapes_cords = [[1.2, 0, 0.5],
+        #         [1.05, 0, 0.9]]
 
-        #                 [0.7,0,1.2],
-        #                 [1.15,0,1.47],
-        #                 [1.2,0,1.6],
-        #                 [1.3,0,1.8],
-        #                 [0.95,0,1.68],
-        #                 [1.3,0,1.2]]
+        grapes_cords = [[1.2, 0, 1.2],[1.15, 0.0, 1.2],[ 1.2, 0.0, 1.25],
+            [1.05, 0, 1.28], [1.0, 0.0, 1.28], [1.1, 0.0, 1.28], [1.05, 0.0, 1.23],   [1.05, 0.0, 1.33],
+            [1.1, 0, 1.35], [1.05, 0.0, 1.35], [1.15, 0.0, 1.35], [1.1, 0.0, 1.3], [1.1,0.0, 1.4],
+            [0.9, 0, 1.47], [0.85, 0.0, 1.47], [0.95, 0.0, 1.47], [0.9, 0.0, 1.42], [0.9, 0.0, 1.52],
+            [1.2, 0, 1.5], [1.15, 0.0, 1.5], [1.2, 0.0, 1.45], [1.2, 0.0, 1.55],
+            [1.05, 0, 1.6], [1.0, 0.0, 1.6], [1.1, 0.0, 1.6], [1.05, 0.0, 1.55], [1.05,0.0, 1.65],
+            [0.85, 0, 1.7], [0.8, 0.0, 1.7], [0.9, 0.0, 1.7], [0.85, 0.0, 1.65], [0.85,0.0, 1.75],
+            [1.1, 0, 1.75], [1.05, 0.0, 1.75], [1.15, 0.0, 1.75], [1.1, 0.0, 1.7], [1.1,0.0, 1.8],
+            [1.2, 0, 1.8], [1.15, 0.15, 1.8], [1.2, 0.15, 1.75],
+            [0.7, 0, 1.8], [0.75, 0.0, 1.8], [0.7, 0.0, 1.75]]
 
-        grapes_cords = [[1.2, 0, 1.2],
-                [1.05, 0, 1.28],
-                [1.1, 0, 1.35],
-                [0.9, 0, 1.47],
-                [1.2, 0, 1.5],
-                [1.05, 0, 1.6],
-                [0.85, 0, 1.7],
-                [1.1, 0, 1.75],
-                [1.2, 0, 1.8],
-                [0.7, 0, 1.8]]
 
         self.grapes_positions = grapes_cords
         self.save_name = 'results_file' + datetime.now().strftime("%d_%m_") + str(dof) + "dof_" \
                         + str(self.dof) + "d_"
         # for some reason the 1st manipulator must succeed reach to point otherwise the other manipulators will failed
-        main_launch_arg = ["gazebo_gui:=false", "rviz:=false", "dof:=" + str(self.dof) + "dof" , "man:=" +str(arm_name)]
+        main_launch_arg = ["gazebo_gui:=true", "rviz:=false", "dof:=" + str(self.dof) + "dof" , "man:=" +str(arm_name)]
         self.main = self.ros.start_launch("main", self.path, "man_gazebo", main_launch_arg)  # main launch file
         sleep(0.1)
         import moveit_commander
@@ -634,81 +616,83 @@ def calc_links_options(min_length=1.4, max_lenght = 2, link_min=0.1, link_interv
 
 if __name__ == '__main__':
 
-    joint_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Joint_Configs_Indexs.csv")
-    link_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Link_Configs_Indexs.csv")
+    # joint_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Joint_Configs_Indexs.csv")
+    # link_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Link_Configs_Indexs.csv")
 
 
-    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
-                                            "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
+    # simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
+    #                                         "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
 
-    # result_file='/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/optimization_results_tests2.csv'
+    # # result_file='/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/optimization_results_tests2.csv'
     
-    joint_index = sys.argv[1] # var1
-    link_index = sys.argv[2] # var3
-    arm_name = sys.argv[3] # var4
-    result_file = sys.argv[4]
+    # joint_index = sys.argv[1] # var1
+    # link_index = sys.argv[2] # var3
+    # arm_name = sys.argv[3] # var4
+    # result_file = sys.argv[4]
 
-    # Get new particle info
-    joints = joint_config_index.loc[joint_config_index["Index"]== int(joint_index)]
-    links = link_config_index.loc[link_config_index["Index"]==int(link_index)]
-
-
-    joint_types=[joints['Joint'+str(i+1)+'_Type'].values[0] for i in range(6)]
-    joint_axis=[joints['Joint'+str(i+1)+'_Axis'].values[0] for i in range(6)]
-    links_lengths = [str(links['Link'+str(i+1)+'_Length'].values[0]) for i in range(6)]
-
-    # print("Joints types: ", joint_types)
-    # print("Joints axis: ", joint_axis)
-    # print("Links lengths: ", links_lengths)
-
-    # Create URDF - the particle
-    # arm_name = create_arm(joint_types,joint_axis,links_lengths)
+    # # Get new particle info
+    # joints = joint_config_index.loc[joint_config_index["Index"]== int(joint_index)]
+    # links = link_config_index.loc[link_config_index["Index"]==int(link_index)]
 
 
-    one_at_a_time(6,arm_name,simulation_db,joint_types,links_lengths,result_file)
+    # joint_types=[joints['Joint'+str(i+1)+'_Type'].values[0] for i in range(6)]
+    # joint_axis=[joints['Joint'+str(i+1)+'_Axis'].values[0] for i in range(6)]
+    # links_lengths = [str(links['Link'+str(i+1)+'_Length'].values[0]) for i in range(6)]
+
+    # # print("Joints types: ", joint_types)
+    # # print("Joints axis: ", joint_axis)
+    # # print("Links lengths: ", links_lengths)
+
+    # # Create URDF - the particle
+    # # arm_name = create_arm(joint_types,joint_axis,links_lengths)
+
+
+    # one_at_a_time(6,arm_name,simulation_db,joint_types,links_lengths,result_file)
+
+
 
     ''' Runing simulation- Go through all URDF files in 6dof/arms folder
         all simulations data is saved in sim_results file
         all URDFs has to be saved in a configuration name format
     '''
-    # simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
-    #                                         "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
-    # #directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
+    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
+                                            "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
+    #directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
 
 
-    # print(sys.argv[0])
-    # #print(sys.argv[1])
-    # arm_name_urdf = sys.argv[1] # var1
-    # directory = sys.argv[2] # var3
-    # to_directory = sys.argv[3] # var4
-    # result_file = sys.argv[4] # var5
-    # print(sys.argv[5], "dof")
-    # dof = sys.argv[5] # var6
-    # file_number = sys.argv[6] # var2
-    # print(directory, "directory")
-    # print(to_directory, "to_directory")
-    # print(result_file, "result_file")
-    # arm_name = re.sub('\.urdf$', '', arm_name_urdf)
-    # print("arm name",arm_name)
-    # #head,arm_name = os.path.split(f[0:-11])
-    # configuration = arm_name.split("_")
-    # configuration = configuration[1:]
+    print(sys.argv[0])
+    #print(sys.argv[1])
+    arm_name_urdf = sys.argv[1] # var1
+    directory = sys.argv[2] # var3
+    to_directory = sys.argv[3] # var4
+    result_file = sys.argv[4] # var5
+    print(sys.argv[5], "dof")
+    dof = sys.argv[5] # var6
+    file_number = sys.argv[6] # var2
+    print(directory, "directory")
+    print(to_directory, "to_directory")
+    print(result_file, "result_file")
+    arm_name = re.sub('\.urdf$', '', arm_name_urdf)
+    print("arm name",arm_name)
+    #head,arm_name = os.path.split(f[0:-11])
+    configuration = arm_name.split("_")
+    configuration = configuration[1:]
 
-    # joint_types=[]
-    # joint_axis=[]
-    # links=[]
-    # for i in range(0,len(configuration)-3,4):
-    #     joint_types.append(configuration[i])
-    #     joint_axis.append(configuration[i+1])
-    #     links.append(configuration[i+2]+"."+configuration[i+3])
-    # # print("joint_types",joint_types)
-    # # print("joint_axis",joint_axis)
-    # # print("links",links)
+    joint_types=[]
+    joint_axis=[]
+    links=[]
+    for i in range(0,len(configuration)-3,4):
+        joint_types.append(configuration[i])
+        joint_axis.append(configuration[i+1])
+        links.append(configuration[i+2]+"."+configuration[i+3])
+    # print("joint_types",joint_types)
+    # print("joint_axis",joint_axis)
+    # print("links",links)
 
-    # one_at_a_time(dof,arm_name,simulation_db,joint_types,links,result_file)
-    # print(directory + arm_name_urdf+'.xacro',"first")
-    # os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
-    #os.rename(directory + arm_name_urdf +'.xacro', directory + arm_name_urdf+'.xacro')
+    one_at_a_time(dof,arm_name,simulation_db,joint_types,links,result_file)
+    print(directory + arm_name_urdf+'.xacro',"first")
+    os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
+    os.rename(directory + arm_name_urdf +'.xacro', directory + arm_name_urdf+'.xacro')
 
 
     # simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Sucsses", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Mid joint proximity",""])

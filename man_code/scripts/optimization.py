@@ -350,12 +350,13 @@ def pso(joint_config_indexs,link_config_indexs, generation_num, population_size,
             pd.DataFrame(initialization_track).to_csv(track_file, index=False,header=False)
 
     colors = np.random.random(len(swarm))
-    show_particles(swarm,0,False,colors,"")
+    # show_particles(swarm,0,False,colors,"")
 
     # main loop of pso
     Iter = 0
 
     # generate random chaotic number
+    random.seed(456)
     zk = random.random()
     # initialization rules
     if ((zk==0.0) or (zk==0.25) or (zk==0.5) or (zk == 0.75) or (zk==1.0)) :
@@ -417,7 +418,7 @@ def pso(joint_config_indexs,link_config_indexs, generation_num, population_size,
                 pd.DataFrame(iteration_track).to_csv(track_file, index=False)
 
         print("ITERR",Iter)
-        show_particles(swarm,Iter,False,colors,"") 
+        # show_particles(swarm,Iter,False,colors,"") 
         Iter += 1
     
     return gbest_position, gbest_fitness
@@ -430,7 +431,7 @@ if __name__ == '__main__':
 
     # population_size = 20 # common selection is between 20-50
 
-    for i in range(2):
+    for i in range(4,10):
         track_file = '/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/finalexperiment_track'+str(i)+'.csv'
         sim_res_file = '/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/sim_res_file'+str(i)+'.csv'
         start_time = datetime.now()
@@ -438,12 +439,10 @@ if __name__ == '__main__':
             cr = csv.writer(f,delimiter=";",lineterminator="\n")
             cr.writerow([start_time])
 
-        population_size = 2
+        population_size = 50
         seeds = [(j+1) for j in range(i*population_size,(i*population_size)+population_size)]
         print(seeds)
-        print(seeds[0])
-        print(seeds[1])
-        gbest_position, gbest_fitness = pso(joint_config_indexs=joint_config_index,link_config_indexs=link_config_index, generation_num=2, population_size=population_size,w_type='CLDIW', jump_threshold=10, track_file=track_file, sim_res_file=sim_res_file, seeds=seeds)
+        gbest_position, gbest_fitness = pso(joint_config_indexs=joint_config_index,link_config_indexs=link_config_index, generation_num=200, population_size=population_size,w_type='CLDIW', jump_threshold=10, track_file=track_file, sim_res_file=sim_res_file, seeds=seeds)
         print("Final Result:  " + " Best fitness = Reached "+str(gbest_fitness[0])+" Clusters, "+"Min Manipulability: " +str(gbest_fitness[1])+ ", Best Arm = " +str(gbest_position.arm_name) + " , Best Joint index = " + str(gbest_position.joint_config_index)+ " , Best Link Index = " + str(gbest_position.link_config_index))
         
         end_time = datetime.now()
