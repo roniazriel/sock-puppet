@@ -454,9 +454,9 @@ class UrdfClass(object):
 
 
 
-joint_types=['roll', 'pris', 'pitch', 'roll', 'pris', 'pitch']
-joint_axis= ['z', 'y', 'x', 'x', 'y', 'y']
-links =['0.1', '0.3', '0.5', '0.1', '0.7', '0.3']
+joint_types=['roll', 'pitch', 'pris', 'roll','pitch']
+joint_axis= ['z', 'y', 'x', 'y','y']
+links =['0.1', '0.1', '0.7', '0.5','0.1']
 create_arm(joint_types,joint_axis,links)
 
 #pso
