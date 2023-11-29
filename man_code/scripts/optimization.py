@@ -113,14 +113,10 @@ class Particle:
             subprocess.call(['gnome-terminal', '--wait','--', '/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/simulation_manager_shell.sh']+args)
             # print("I have not waited")
             # time.sleep(30)
-
             os.rename('/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'+ arm_name+'.urdf.xacro', '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/tested_arms/'+ arm_name+'.urdf.xacro')
-
             results_df = pd.read_csv(result_file,index_col=0)
             results_df["Success"] = results_df["Success"].astype(int)
-
             ans = results_df.tail(10).groupby('Arm ID').aggregate({'Success': 'sum', 'Manipulability - mu': 'min'}).reset_index().rename(columns={'Success': 'Reachability', 'Manipulability - mu': 'Min_Manipulability'})
-
             Reachability = ans.loc[(ans['Arm ID'] == arm_name)]['Reachability'].values[0]
             Min_Manipulability = ans.loc[(ans['Arm ID'] == arm_name)]['Min_Manipulability'].values[0]
         except:

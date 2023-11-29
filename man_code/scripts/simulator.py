@@ -616,85 +616,89 @@ def calc_links_options(min_length=1.4, max_lenght = 2, link_min=0.1, link_interv
 
 if __name__ == '__main__':
 
-    # joint_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Joint_Configs_Indexs.csv")
-    # link_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Link_Configs_Indexs.csv")
+    ################################################################# OPTIMIZATION  ##############################################################################
+
+    joint_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Joint_Configs_Indexs.csv")
+    link_config_index = pd.read_csv("/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/Sorted_Link_Configs_Indexs.csv")
 
 
-    # simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
-    #                                         "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
+    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
+                                            "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
 
-    # # result_file='/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/optimization_results_tests2.csv'
+    # result_file='/home/ar1/catkin_ws/src/sock-puppet/man_code/scripts/optimization_results_tests2.csv'
     
-    # joint_index = sys.argv[1] # var1
-    # link_index = sys.argv[2] # var3
-    # arm_name = sys.argv[3] # var4
-    # result_file = sys.argv[4]
+    joint_index = sys.argv[1] # var1
+    link_index = sys.argv[2] # var3
+    arm_name = sys.argv[3] # var4
+    result_file = sys.argv[4]
 
-    # # Get new particle info
-    # joints = joint_config_index.loc[joint_config_index["Index"]== int(joint_index)]
-    # links = link_config_index.loc[link_config_index["Index"]==int(link_index)]
-
-
-    # joint_types=[joints['Joint'+str(i+1)+'_Type'].values[0] for i in range(6)]
-    # joint_axis=[joints['Joint'+str(i+1)+'_Axis'].values[0] for i in range(6)]
-    # links_lengths = [str(links['Link'+str(i+1)+'_Length'].values[0]) for i in range(6)]
-
-    # # print("Joints types: ", joint_types)
-    # # print("Joints axis: ", joint_axis)
-    # # print("Links lengths: ", links_lengths)
-
-    # # Create URDF - the particle
-    # # arm_name = create_arm(joint_types,joint_axis,links_lengths)
+    # Get new particle info
+    joints = joint_config_index.loc[joint_config_index["Index"]== int(joint_index)]
+    links = link_config_index.loc[link_config_index["Index"]==int(link_index)]
 
 
-    # one_at_a_time(6,arm_name,simulation_db,joint_types,links_lengths,result_file)
+    joint_types=[joints['Joint'+str(i+1)+'_Type'].values[0] for i in range(6)]
+    joint_axis=[joints['Joint'+str(i+1)+'_Axis'].values[0] for i in range(6)]
+    links_lengths = [str(links['Link'+str(i+1)+'_Length'].values[0]) for i in range(6)]
+
+    # print("Joints types: ", joint_types)
+    # print("Joints axis: ", joint_axis)
+    # print("Links lengths: ", links_lengths)
+
+    # Create URDF - the particle
+    # arm_name = create_arm(joint_types,joint_axis,links_lengths)
 
 
+    one_at_a_time(6,arm_name,simulation_db,joint_types,links_lengths,result_file)
+
+
+    ########################################################## MULTIPULE SIMULATIONS #########################################################################
 
     ''' Runing simulation- Go through all URDF files in 6dof/arms folder
         all simulations data is saved in sim_results file
         all URDFs has to be saved in a configuration name format
     '''
-    simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
-                                            "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
-    #directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
+    # simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Success", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Manipulability - roni","Mid joint proximity",
+    #                                         "Max Mid joint proximity","Sum Mid joint proximity","Sum Mid joint proximity- all joints"])
+    # #directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/4dof/arms/'
 
 
-    print(sys.argv[0])
-    #print(sys.argv[1])
-    arm_name_urdf = sys.argv[1] # var1
-    directory = sys.argv[2] # var3
-    to_directory = sys.argv[3] # var4
-    result_file = sys.argv[4] # var5
-    print(sys.argv[5], "dof")
-    dof = sys.argv[5] # var6
-    file_number = sys.argv[6] # var2
-    print(directory, "directory")
-    print(to_directory, "to_directory")
-    print(result_file, "result_file")
-    arm_name = re.sub('\.urdf$', '', arm_name_urdf)
-    print("arm name",arm_name)
-    #head,arm_name = os.path.split(f[0:-11])
-    configuration = arm_name.split("_")
-    configuration = configuration[1:]
+    # print(sys.argv[0])
+    # #print(sys.argv[1])
+    # arm_name_urdf = sys.argv[1] # var1
+    # directory = sys.argv[2] # var3
+    # to_directory = sys.argv[3] # var4
+    # result_file = sys.argv[4] # var5
+    # print(sys.argv[5], "dof")
+    # dof = sys.argv[5] # var6
+    # file_number = sys.argv[6] # var2
+    # print(directory, "directory")
+    # print(to_directory, "to_directory")
+    # print(result_file, "result_file")
+    # arm_name = re.sub('\.urdf$', '', arm_name_urdf)
+    # print("arm name",arm_name)
+    # #head,arm_name = os.path.split(f[0:-11])
+    # configuration = arm_name.split("_")
+    # configuration = configuration[1:]
 
-    joint_types=[]
-    joint_axis=[]
-    links=[]
-    for i in range(0,len(configuration)-3,4):
-        joint_types.append(configuration[i])
-        joint_axis.append(configuration[i+1])
-        links.append(configuration[i+2]+"."+configuration[i+3])
-    # print("joint_types",joint_types)
-    # print("joint_axis",joint_axis)
-    # print("links",links)
+    # joint_types=[]
+    # joint_axis=[]
+    # links=[]
+    # for i in range(0,len(configuration)-3,4):
+    #     joint_types.append(configuration[i])
+    #     joint_axis.append(configuration[i+1])
+    #     links.append(configuration[i+2]+"."+configuration[i+3])
+    # # print("joint_types",joint_types)
+    # # print("joint_axis",joint_axis)
+    # # print("links",links)
 
-    one_at_a_time(dof,arm_name,simulation_db,joint_types,links,result_file)
-    print(directory + arm_name_urdf+'.xacro',"first")
-    os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
-    os.rename(directory + arm_name_urdf +'.xacro', directory + arm_name_urdf+'.xacro')
+    # one_at_a_time(dof,arm_name,simulation_db,joint_types,links,result_file)
+    # print(directory + arm_name_urdf+'.xacro',"first")
+    # os.rename(directory + arm_name_urdf+'.xacro', to_directory + arm_name_urdf+'.xacro')
+    # os.rename(directory + arm_name_urdf +'.xacro', directory + arm_name_urdf+'.xacro')
 
-
+    ############################################################################## UTILS ##########################################################################
+    
     # simulation_db = pd.DataFrame(columns=["Arm ID","Point number", "Move duration", "Sucsses", "Manipulability - mu","Manipulability - jacobian","Manipulability - cur pose","Mid joint proximity",""])
     # directory = '/home/ar1/catkin_ws/src/sock-puppet/man_gazebo/urdf/6dof/arms/'
     # # file_number=999
